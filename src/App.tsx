@@ -1,35 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { useAuth } from './hooks/useAuth';
+import { LoginForm } from './components/LoginForm';
+import { Sidebar } from './components/Sidebar';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { user, login, logout, isLoading } = useAuth();
+  const [currentPage, setCurrentPage] = useState('overview');
+
+  if (!user) {
+    return <LoginForm onLogin={login} isLoading={isLoading} />;
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+      <Sidebar 
+        user={user} 
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
+        onLogout={logout}
+      />
+      <main style={{ flex: 1, padding: '32px' }}>
+        <div style={{ 
+          backgroundColor: 'white', 
+          borderRadius: '12px', 
+          padding: '32px',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <h1 style={{ 
+            fontSize: '32px', 
+            fontWeight: 'bold', 
+            color: '#1f2937',
+            marginBottom: '16px'
+          }}>
+            Welcome to Ascensio
+          </h1>
+          <p style={{ fontSize: '16px', color: '#6b7280', marginBottom: '32px' }}>
+            Current page: <strong>{currentPage}</strong>
+          </p>
+          <p style={{ fontSize: '14px', color: '#9ca3af' }}>
+            This is your new Ascensio application built with React + TypeScript and Vite.
+            The sidebar navigation is functional and ready for your custom content.
+          </p>
+        </div>
+      </main>
+    </div>
+  );
 }
 
 export default App

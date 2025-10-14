@@ -7,8 +7,7 @@ import {
   CreditCard,
   MessageSquare,
   FileText,
-  Settings,
-  LogOut
+  Settings
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -22,7 +21,7 @@ interface SidebarProps {
   onLogout: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ user, currentPage, onNavigate, onLogout }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ user, currentPage, onNavigate }) => {
   const menuItems = [
     { icon: Activity, label: 'Overview', page: 'overview' },
     { icon: Calendar, label: 'Appointment', page: 'appointments' },
@@ -55,7 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, currentPage, onNavigate,
           </div>
           <span className="text-subheading font-semibold" 
                 style={{ color: 'var(--color-text-primary)' }}>
-            Doct.
+            Ascensio
           </span>
         </div>
       </div>

@@ -24,7 +24,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ user, currentPage, onNavigate }) => {
   const menuItems = [
     { icon: Activity, label: 'Overview', page: 'overview' },
-    { icon: Calendar, label: 'Appointment', page: 'appointments' },
+    { icon: Calendar, label: 'Results Table', page: 'appointments' },
     { icon: UserCheck, label: 'My Patient', page: 'patients' },
     { icon: Clock, label: 'Schedule Timings', page: 'schedule' },
     { icon: CreditCard, label: 'Payments', page: 'payments' },
@@ -41,21 +41,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, currentPage, onNavigate 
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        borderRight: '1px solid var(--color-border-light)',
+        borderRight: '1px solid var(--color-border)',
         background: 'var(--color-surface)',
-        boxShadow: 'var(--shadow-sm)'
+        boxShadow: 'var(--shadow-md)'
       }}>
       {/* Logo/Header */}
-      <div className="p-6 border-b" style={{ borderColor: 'var(--color-border-light)' }}>
+      <div className="p-6 border-b" style={{ borderColor: 'var(--color-border)' }}>
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" 
-               style={{ background: 'var(--color-primary)' }}>
-            <Activity className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-subheading font-semibold" 
-                style={{ color: 'var(--color-text-primary)' }}>
-            Ascensio
-          </span>
+          <img 
+            src="/ascensio-logo.jpg" 
+            alt="Ascensio Logo" 
+            style={{ 
+              width: '200px', 
+              height: 'auto',
+              maxHeight: '80px',
+              objectFit: 'contain'
+            }}
+          />
         </div>
       </div>
 
@@ -81,25 +83,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, currentPage, onNavigate 
                   border: 'none',
                   cursor: 'pointer',
                   background: isActive 
-                    ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
+                    ? 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)'
                     : 'transparent',
-                  color: isActive ? 'white' : '#6b7280',
+                  color: isActive ? 'white' : 'var(--color-text-secondary)',
                   fontWeight: isActive ? '500' : '400'
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.backgroundColor = '#f9fafb';
-                    e.currentTarget.style.color = '#111827';
+                    e.currentTarget.style.backgroundColor = 'var(--color-primary-50)';
+                    e.currentTarget.style.color = 'var(--color-primary)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
                     e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = '#6b7280';
+                    e.currentTarget.style.color = 'var(--color-text-secondary)';
                   }
                 }}
               >
-                <Icon style={{ width: '20px', height: '20px', color: isActive ? 'white' : '#9ca3af' }} />
+                <Icon style={{ width: '20px', height: '20px', color: isActive ? 'white' : 'var(--color-text-tertiary)' }} />
                 <span style={{ fontSize: '14px', color: isActive ? 'white' : 'inherit' }}>
                   {item.label}
                 </span>
@@ -116,23 +118,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, currentPage, onNavigate 
         left: 0, 
         right: 0, 
         padding: '16px', 
-        borderTop: '1px solid var(--color-border-light)' 
+        borderTop: '1px solid var(--color-border)',
+        backgroundColor: 'var(--color-primary-50)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div className="w-10 h-10 rounded-full flex items-center justify-center" 
-               style={{ background: 'var(--color-primary)', opacity: 0.1 }}>
+               style={{ background: 'var(--color-primary)' }}>
             <span className="text-small font-medium" 
-                  style={{ color: 'var(--color-primary)' }}>
+                  style={{ color: 'white', fontSize: '14px', fontWeight: '600' }}>
               {user.firstName[0]}{user.lastName[0]}
             </span>
           </div>
           <div>
             <div className="text-small font-medium" 
-                 style={{ color: 'var(--color-text-primary)' }}>
+                 style={{ color: 'var(--color-text-primary)', fontSize: '14px', fontWeight: '500' }}>
               {user.firstName} {user.lastName}
             </div>
             <div className="text-caption" 
-                 style={{ color: 'var(--color-text-secondary)' }}>
+                 style={{ color: 'var(--color-text-secondary)', fontSize: '12px' }}>
               {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
             </div>
           </div>

@@ -25,7 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, currentPage, onNavigate 
   const menuItems = [
     { icon: Activity, label: 'Overview', page: 'overview' },
     { icon: Calendar, label: 'Results Table', page: 'appointments' },
-    { icon: UserCheck, label: 'My Patient', page: 'patients' },
+    { icon: UserCheck, label: 'My Patients', page: 'patients' },
     { icon: Clock, label: 'Schedule Timings', page: 'schedule' },
     { icon: CreditCard, label: 'Payments', page: 'payments' },
     { icon: MessageSquare, label: 'Message', page: 'messages' },

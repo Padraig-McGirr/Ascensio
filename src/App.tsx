@@ -10,6 +10,8 @@ import { LiverFunctionPage } from './components/LiverFunctionPage';
 import { LipidProfilePage } from './components/LipidProfilePage';
 import { KidneyFunctionPage } from './components/KidneyFunctionPage';
 import { BloodSugarTshPsaPage } from './components/BloodSugarTshPsaPage';
+import { MyPatientsPage } from './components/MyPatientsPage';
+import { ComparographPage } from './components/ComparographPage';
 import './App.css';
 
 function App() {
@@ -62,6 +64,10 @@ function App() {
           <KidneyFunctionPage />
         ) : currentPage === 'blood-sugar-tsh-psa' ? (
           <BloodSugarTshPsaPage />
+        ) : currentPage === 'patients' ? (
+          <MyPatientsPage />
+        ) : currentPage === 'comparograph' ? (
+          <ComparographPage onNavigate={setCurrentPage} />
         ) : (
           <div style={{ padding: '32px' }}>
             <div className="medical-card" style={{ 

@@ -290,23 +290,40 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => {
               biomarkerData={biomarkerData.bloodSugarTshPsa}
             />
 
-            {/* Bottom spacer for additional KPIs */}
-            <div style={{ 
-              height: '60px',
-              backgroundColor: 'var(--color-background)',
-              border: '2px dashed var(--color-border)',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <span style={{ 
-                fontSize: 'var(--text-xs)', 
-                color: 'var(--color-text-tertiary)'
-              }}>
-                Additional KPI space
-              </span>
-            </div>
+            {/* Compare Results Button */}
+            <button 
+              onClick={() => onNavigate?.('comparograph')}
+              style={{ 
+                height: '60px',
+                backgroundColor: 'var(--color-secondary)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px',
+                margin: '0',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 'var(--text-base)',
+                fontWeight: '600',
+                boxShadow: 'var(--shadow-md)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--color-secondary-dark)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--color-secondary)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+              }}
+            >
+              📊 Compare Results
+            </button>
           </div>
         </div>
       </div>

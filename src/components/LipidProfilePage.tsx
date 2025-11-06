@@ -8,11 +8,271 @@ CHOLESTEROL HDL (mmol / L),1.77,1.51,1.86,1.76,-15%,23%,-5%
 CHOLESTEROL LDL (mmol/L),1.62,1.29,2.14,2.19,-20%,66%,2%
 non HDL CHOLESTEROL (mmol/L),2.13,1.79,2.74,2.84,-16%,53%,4%`;
 
+// Lipid profile ranges data
+const bloodRangesData = {
+  'CHOLESTEROL (TOTAL)mmol/L': { min: 2.0, max: 5.0 },
+  'TRIGLYCERIDES (mmol / L)': { min: 0.5, max: 2.0 },
+  'CHOLESTEROL HDL (mmol / L)': { min: 1.2, max: 2.0 },
+  'CHOLESTEROL LDL (mmol/L)': { min: 0.31, max: 3.0 },
+  'non HDL CHOLESTEROL (mmol/L)': { min: 0, max: 3.8 }
+};
+
 interface DataPoint {
   date: string;
   value: number;
   biomarker: string;
 }
+
+interface CircularGaugeProps {
+  biomarker: string;
+  value: number;
+  ranges: {
+    min: number;
+    max: number;
+  };
+  selectedDate: string;
+  onHover?: (cell: { biomarker: string; column: string } | null) => void;
+}
+
+const CircularGauge: React.FC<CircularGaugeProps> = ({ biomarker, value, ranges, selectedDate, onHover }) => {
+  const size = 110;
+  const strokeWidth = 10;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  
+  // Calculate percentage within the range
+  const percentage = ((value - ranges.min) / (ranges.max - ranges.min)) * 100;
+  
+  // Calculate position on the 3/4 circle (270 degrees)
+  // Clamp the position between 0.02 (very small arc) and 0.75 (full range)
+  const valuePosition = Math.max(0.02, Math.min((percentage / 100) * 0.75, 0.75));
+  
+  // Determine color based on percentage
+  let valueColor = '#fbbf24'; // yellow (0-25%)
+  if (percentage > 75) {
+    valueColor = '#a855f7'; // light purple (75%+)
+  } else if (percentage >= 26) {
+    valueColor = '#10b981'; // green (26-74%)
+  }
+  
+  // Function to get column identifier from date
+  const getColumnFromDate = (date: string) => {
+    if (date === '2/28/2024') return 'feb';
+    if (date === '8/30/2024') return 'aug';
+    if (date === '03/11/2025') return 'mar';
+    return '';
+  };
+  
+  return (
+    <div 
+      style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center',
+        backgroundColor: '#f8fafc',
+        padding: '16px',
+        borderRadius: '8px',
+        border: '1px solid #e2e8f0',
+        width: '100%',
+        maxWidth: '180px',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease'
+      }}
+      onMouseEnter={() => onHover?.({ biomarker, column: getColumnFromDate(selectedDate) })}
+      onMouseLeave={() => onHover?.(null)}
+    >
+      <h4 style={{ 
+        fontSize: '10px', 
+        fontWeight: '600', 
+        margin: '0 0 8px 0',
+        textAlign: 'center',
+        color: '#475569'
+      }}>
+        {biomarker.split(' (')[0].replace('CHOLESTEROL ', '')}
+      </h4>
+      
+      <div style={{ position: 'relative', width: size, height: size }}>
+        <svg width={size} height={size} style={{ transform: 'rotate(-135deg)' }}>
+          {/* Background track (full range) */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="#e2e8f0"
+            strokeWidth={strokeWidth}
+            strokeDasharray={`${circumference * 0.75} ${circumference}`}
+            strokeLinecap="round"
+          />
+          
+          {/* Value indicator - colored arc up to the value */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={valueColor}
+            strokeWidth={strokeWidth}
+            strokeDasharray={`${valuePosition * circumference} ${circumference}`}
+            strokeLinecap="round"
+          />
+        </svg>
+        
+        {/* Value display */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          textAlign: 'center'
+        }}>
+          <div style={{ 
+            fontSize: '16px', 
+            fontWeight: '700',
+            color: '#1e293b',
+            lineHeight: '1'
+          }}>
+            {value}
+          </div>
+        </div>
+      </div>
+      
+      {/* Range labels */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        width: '100%', 
+        marginTop: '8px',
+        fontSize: '8px',
+        color: '#64748b'
+      }}>
+        <span>{ranges.min}</span>
+        <span>{ranges.max}</span>
+      </div>
+    </div>
+  );
+};
+
+interface RangeVisualizationProps {
+  onHover?: (cell: { biomarker: string; column: string } | null) => void;
+  hoveredCell?: { biomarker: string; column: string } | null;
+}
+
+const RangeVisualization: React.FC<RangeVisualizationProps> = ({ onHover, hoveredCell }) => {
+  const [selectedDate, setSelectedDate] = useState<string>('03/11/2025');
+  
+  const availableDates = ['8/28/2023', '2/28/2024', '8/30/2024', '03/11/2025'];
+  
+  // Parse the CSV data to get values for the selected date
+  const getValueForDate = (biomarker: string, date: string): number | null => {
+    const lines = csvData.split('\n');
+    const headers = lines[0].split(',');
+    const dateIndex = headers.indexOf(date);
+    
+    if (dateIndex === -1) return null;
+    
+    for (let i = 1; i < lines.length; i++) {
+      const row = lines[i].split(',');
+      if (row[0] === biomarker) {
+        const value = row[dateIndex];
+        if (value && value !== '#N/A' && !value.includes('%')) {
+          return parseFloat(value);
+        }
+      }
+    }
+    return null;
+  };
+
+  const biomarkers = ['CHOLESTEROL (TOTAL)mmol/L', 'TRIGLYCERIDES (mmol / L)', 'CHOLESTEROL HDL (mmol / L)', 'CHOLESTEROL LDL (mmol/L)', 'non HDL CHOLESTEROL (mmol/L)'];
+
+  return (
+    <div style={{ 
+      padding: '20px',
+      backgroundColor: 'var(--color-surface)',
+      border: '1px solid var(--color-border-light)',
+      borderRadius: '8px',
+      height: 'fit-content',
+      width: '440px'
+    }}>
+      {/* Header with date filter */}
+      <div style={{ marginBottom: '44px' }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center'
+        }}>
+          <h3 style={{ 
+            fontSize: 'var(--text-lg)', 
+            fontWeight: '600', 
+            color: 'var(--color-text-primary)',
+            margin: '0'
+          }}>
+            Range Analysis
+          </h3>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <label style={{ 
+              fontSize: 'var(--text-sm)', 
+              fontWeight: '500', 
+              color: 'var(--color-text-secondary)'
+            }}>
+              Date:
+            </label>
+            <select 
+              value={selectedDate} 
+              onChange={(e) => setSelectedDate(e.target.value)}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '4px',
+                border: '1px solid var(--color-border)',
+                fontSize: 'var(--text-sm)',
+                backgroundColor: 'var(--color-surface)',
+                color: 'var(--color-text-primary)',
+                minWidth: '140px'
+              }}
+            >
+              {availableDates.map(date => (
+                <option key={date} value={date}>
+                  {new Date(date).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                  })}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Gauges Grid */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: '12px',
+        marginTop: '-20px'
+      }}>
+        {biomarkers.map((biomarker) => {
+          const value = getValueForDate(biomarker, selectedDate);
+          const ranges = bloodRangesData[biomarker as keyof typeof bloodRangesData];
+          
+          if (!value || !ranges) return null;
+          
+          return (
+            <CircularGauge
+              key={`${biomarker}-${selectedDate}`}
+              biomarker={biomarker}
+              value={value}
+              ranges={ranges}
+              selectedDate={selectedDate}
+              onHover={onHover}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const parseCSVData = (): DataPoint[] => {
   const lines = csvData.split('\n');
@@ -57,9 +317,9 @@ const LipidProfileLineChart: React.FC<LipidProfileLineChartProps> = ({ onHover, 
   // Get unique dates and sort them
   const dates = [...new Set(data.map(d => d.date))].sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
   
-  const chartWidth = 1200;
+  const chartWidth = 1100;
   const chartHeight = 400;
-  const margin = { top: 20, right: 350, bottom: 60, left: 60 };
+  const margin = { top: 20, right: 250, bottom: 60, left: 80 };
   const plotWidth = chartWidth - margin.left - margin.right;
   const plotHeight = chartHeight - margin.top - margin.bottom;
 
@@ -171,7 +431,7 @@ const LipidProfileLineChart: React.FC<LipidProfileLineChartProps> = ({ onHover, 
         backgroundColor: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
         borderRadius: '8px',
-        padding: '20px'
+        padding: '8px'
       }}>
         <svg width={chartWidth} height={chartHeight}>
           {/* Grid lines */}
@@ -477,9 +737,9 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
           <tr>
             <th style={{ 
               backgroundColor: '#dcfce7', // Light green
-              padding: '8px',
+              padding: '4px',
               border: '1px solid var(--color-border)',
-              textAlign: 'left',
+              textAlign: 'center',
               fontWeight: '600',
               fontSize: 'var(--text-xs)',
               position: 'sticky',
@@ -491,7 +751,7 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
             </th>
             <th style={{ 
               backgroundColor: 'var(--color-surface)',
-              padding: '8px',
+              padding: '4px',
               border: '1px solid var(--color-border)',
               textAlign: 'center',
               fontWeight: '600',
@@ -504,7 +764,7 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
             </th>
             <th style={{ 
               backgroundColor: 'var(--color-surface)',
-              padding: '8px',
+              padding: '4px',
               border: '1px solid var(--color-border)',
               textAlign: 'center',
               fontWeight: '600',
@@ -516,8 +776,21 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
               2/28/2024
             </th>
             <th style={{ 
+              backgroundColor: '#dbeafe', // Light blue
+              padding: '4px',
+              border: '1px solid var(--color-border)',
+              textAlign: 'center',
+              fontWeight: '600',
+              fontSize: 'var(--text-xs)',
+              position: 'sticky',
+              top: 0,
+              zIndex: 10
+            }}>
+              % Change
+            </th>
+            <th style={{ 
               backgroundColor: 'var(--color-surface)',
-              padding: '8px',
+              padding: '4px',
               border: '1px solid var(--color-border)',
               textAlign: 'center',
               fontWeight: '600',
@@ -529,8 +802,21 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
               8/30/2024
             </th>
             <th style={{ 
+              backgroundColor: '#dbeafe', // Light blue
+              padding: '4px',
+              border: '1px solid var(--color-border)',
+              textAlign: 'center',
+              fontWeight: '600',
+              fontSize: 'var(--text-xs)',
+              position: 'sticky',
+              top: 0,
+              zIndex: 10
+            }}>
+              % Change
+            </th>
+            <th style={{ 
               backgroundColor: 'var(--color-surface)',
-              padding: '8px',
+              padding: '4px',
               border: '1px solid var(--color-border)',
               textAlign: 'center',
               fontWeight: '600',
@@ -543,7 +829,7 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
             </th>
             <th style={{ 
               backgroundColor: '#dbeafe', // Light blue
-              padding: '8px',
+              padding: '4px',
               border: '1px solid var(--color-border)',
               textAlign: 'center',
               fontWeight: '600',
@@ -552,33 +838,7 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
               top: 0,
               zIndex: 10
             }}>
-              2/28/2024 Change
-            </th>
-            <th style={{ 
-              backgroundColor: '#dbeafe', // Light blue
-              padding: '8px',
-              border: '1px solid var(--color-border)',
-              textAlign: 'center',
-              fontWeight: '600',
-              fontSize: 'var(--text-xs)',
-              position: 'sticky',
-              top: 0,
-              zIndex: 10
-            }}>
-              8/30/2024 Change
-            </th>
-            <th style={{ 
-              backgroundColor: '#dbeafe', // Light blue
-              padding: '8px',
-              border: '1px solid var(--color-border)',
-              textAlign: 'center',
-              fontWeight: '600',
-              fontSize: 'var(--text-xs)',
-              position: 'sticky',
-              top: 0,
-              zIndex: 10
-            }}>
-              03/11/2025 Change
+              % Change
             </th>
           </tr>
         </thead>
@@ -587,7 +847,7 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
             <tr key={index}>
               <td style={{ 
                 backgroundColor: '#dcfce7', // Light green
-                padding: '6px 8px',
+                padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 fontWeight: '500',
                 fontSize: 'var(--text-xs)',
@@ -599,7 +859,7 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
               </td>
               <td style={{ 
                 backgroundColor: 'var(--color-surface)',
-                padding: '6px 8px',
+                padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)'
@@ -609,7 +869,7 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
               <td style={{ 
                 backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'feb' 
                   ? '#fbbf24' : 'var(--color-surface)',
-                padding: '6px 8px',
+                padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)'
@@ -617,28 +877,8 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
                 {row.feb2024}
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'aug' 
-                  ? '#fbbf24' : 'var(--color-surface)',
-                padding: '6px 8px',
-                border: '1px solid var(--color-border)',
-                textAlign: 'center',
-                fontSize: 'var(--text-xs)'
-              }}>
-                {row.aug2024}
-              </td>
-              <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'mar' 
-                  ? '#fbbf24' : 'var(--color-surface)',
-                padding: '6px 8px',
-                border: '1px solid var(--color-border)',
-                textAlign: 'center',
-                fontSize: 'var(--text-xs)'
-              }}>
-                {row.mar2025}
-              </td>
-              <td style={{ 
                 backgroundColor: '#dbeafe', // Light blue
-                padding: '6px 8px',
+                padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
@@ -656,8 +896,18 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
                 </span>
               </td>
               <td style={{ 
+                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'aug' 
+                  ? '#fbbf24' : 'var(--color-surface)',
+                padding: '3px 4px',
+                border: '1px solid var(--color-border)',
+                textAlign: 'center',
+                fontSize: 'var(--text-xs)'
+              }}>
+                {row.aug2024}
+              </td>
+              <td style={{ 
                 backgroundColor: '#dbeafe', // Light blue
-                padding: '6px 8px',
+                padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
@@ -675,8 +925,18 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
                 </span>
               </td>
               <td style={{ 
+                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'mar' 
+                  ? '#fbbf24' : 'var(--color-surface)',
+                padding: '3px 4px',
+                border: '1px solid var(--color-border)',
+                textAlign: 'center',
+                fontSize: 'var(--text-xs)'
+              }}>
+                {row.mar2025}
+              </td>
+              <td style={{ 
                 backgroundColor: '#dbeafe', // Light blue
-                padding: '6px 8px',
+                padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
@@ -746,7 +1006,7 @@ export const LipidProfilePage: React.FC = () => {
       {/* Main Content Grid */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: '2.5fr 0.5fr', 
+        gridTemplateColumns: '1fr 440px', 
         gap: '12px',
         height: 'calc(100vh - 120px)',
         width: '100%',
@@ -754,44 +1014,49 @@ export const LipidProfilePage: React.FC = () => {
         margin: '0'
       }}>
         
-        {/* Left Column - Results Table */}
-        <div style={{ 
-          backgroundColor: 'var(--color-surface)',
-          border: '1px solid var(--color-border-light)',
-          borderRadius: '8px',
-          padding: '16px',
-          overflow: 'auto'
-        }}>
-          <h2 style={{ 
-            fontSize: 'var(--text-lg)', 
-            fontWeight: '600', 
-            color: 'var(--color-text-primary)',
-            marginBottom: '16px',
-            textAlign: 'center'
-          }}>
-            Lipid Profile Results
-          </h2>
-          
-          <LipidProfileTable onHover={setHoveredCell} hoveredCell={hoveredCell} />
-        </div>
-        
-        {/* Right Column - Charts */}
+        {/* Left Column - Results Table and Chart */}
         <div style={{ 
           display: 'flex', 
           flexDirection: 'column', 
           gap: '12px'
         }}>
-          {/* Chart */}
+          {/* Results Table */}
           <div style={{ 
             backgroundColor: 'var(--color-surface)',
             border: '1px solid var(--color-border-light)',
             borderRadius: '8px',
             padding: '16px',
+            overflow: 'auto'
+          }}>
+            <h2 style={{ 
+              fontSize: 'var(--text-lg)', 
+              fontWeight: '600', 
+              color: 'var(--color-text-primary)',
+              marginBottom: '16px',
+              textAlign: 'center'
+            }}>
+              Lipid Profile Results
+            </h2>
+            
+            <LipidProfileTable onHover={setHoveredCell} hoveredCell={hoveredCell} />
+          </div>
+          
+          {/* Chart */}
+          <div style={{ 
+            backgroundColor: 'var(--color-surface)',
+            border: '1px solid var(--color-border-light)',
+            borderRadius: '8px',
+            padding: '8px',
             flex: 1,
             overflow: 'auto'
           }}>
             <LipidProfileLineChart onHover={setHoveredCell} hoveredCell={hoveredCell} />
           </div>
+        </div>
+        
+        {/* Right Column - Range Visualization */}
+        <div>
+          <RangeVisualization onHover={setHoveredCell} hoveredCell={hoveredCell} />
         </div>
       </div>
     </div>

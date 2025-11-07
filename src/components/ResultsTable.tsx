@@ -50,6 +50,15 @@ export const ResultsTable: React.FC = () => {
     { biomarker: 'PSA', baseline: '#N/A', feb2024: '#N/A', aug2024: '#N/A', mar2025: '#N/A', febChange: '#N/A', augChange: '#N/A', marChange: '#N/A' }
   ];
 
+  const getPercentageColor = (value: string) => {
+    if (value === '#N/A') return 'transparent';
+    const numValue = Math.abs(parseFloat(value.replace('%', '')));
+    if (numValue > 100) return '#dc2626'; // Red
+    if (numValue > 75) return '#7c3aed'; // Purple  
+    if (numValue > 25) return '#059669'; // Green
+    return '#eab308'; // Yellow
+  };
+
   return (
     <div style={{ 
       padding: '0',
@@ -100,9 +109,9 @@ export const ResultsTable: React.FC = () => {
                 <tr>
                   <th style={{ 
                     backgroundColor: '#dcfce7', // Light green
-                    padding: '8px',
+                    padding: '4px',
                     border: '1px solid var(--color-border)',
-                    textAlign: 'left',
+                    textAlign: 'center',
                     fontWeight: '600',
                     fontSize: 'var(--text-xs)',
                     position: 'sticky',
@@ -114,7 +123,7 @@ export const ResultsTable: React.FC = () => {
                   </th>
                   <th style={{ 
                     backgroundColor: 'var(--color-surface)',
-                    padding: '8px',
+                    padding: '4px',
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
@@ -127,7 +136,7 @@ export const ResultsTable: React.FC = () => {
                   </th>
                   <th style={{ 
                     backgroundColor: 'var(--color-surface)',
-                    padding: '8px',
+                    padding: '4px',
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
@@ -139,8 +148,21 @@ export const ResultsTable: React.FC = () => {
                     2/28/2024
                   </th>
                   <th style={{ 
+                    backgroundColor: '#dbeafe', // Light blue
+                    padding: '4px',
+                    border: '1px solid var(--color-border)',
+                    textAlign: 'center',
+                    fontWeight: '600',
+                    fontSize: 'var(--text-xs)',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10
+                  }}>
+                    % Change
+                  </th>
+                  <th style={{ 
                     backgroundColor: 'var(--color-surface)',
-                    padding: '8px',
+                    padding: '4px',
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
@@ -152,8 +174,21 @@ export const ResultsTable: React.FC = () => {
                     8/30/2024
                   </th>
                   <th style={{ 
+                    backgroundColor: '#dbeafe', // Light blue
+                    padding: '4px',
+                    border: '1px solid var(--color-border)',
+                    textAlign: 'center',
+                    fontWeight: '600',
+                    fontSize: 'var(--text-xs)',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10
+                  }}>
+                    % Change
+                  </th>
+                  <th style={{ 
                     backgroundColor: 'var(--color-surface)',
-                    padding: '8px',
+                    padding: '4px',
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
@@ -166,7 +201,7 @@ export const ResultsTable: React.FC = () => {
                   </th>
                   <th style={{ 
                     backgroundColor: '#dbeafe', // Light blue
-                    padding: '8px',
+                    padding: '4px',
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
@@ -175,33 +210,7 @@ export const ResultsTable: React.FC = () => {
                     top: 0,
                     zIndex: 10
                   }}>
-                    2/28/2024 Change
-                  </th>
-                  <th style={{ 
-                    backgroundColor: '#dbeafe', // Light blue
-                    padding: '8px',
-                    border: '1px solid var(--color-border)',
-                    textAlign: 'center',
-                    fontWeight: '600',
-                    fontSize: 'var(--text-xs)',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 10
-                  }}>
-                    8/30/2024 Change
-                  </th>
-                  <th style={{ 
-                    backgroundColor: '#dbeafe', // Light blue
-                    padding: '8px',
-                    border: '1px solid var(--color-border)',
-                    textAlign: 'center',
-                    fontWeight: '600',
-                    fontSize: 'var(--text-xs)',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 10
-                  }}>
-                    03/11/2025 Change
+                    % Change
                   </th>
                 </tr>
               </thead>
@@ -210,7 +219,7 @@ export const ResultsTable: React.FC = () => {
                   <tr key={index}>
                     <td style={{ 
                       backgroundColor: '#dcfce7', // Light green
-                      padding: '6px 8px',
+                      padding: '3px 4px',
                       border: '1px solid var(--color-border)',
                       fontWeight: '500',
                       fontSize: 'var(--text-xs)',
@@ -221,76 +230,104 @@ export const ResultsTable: React.FC = () => {
                       {row.biomarker}
                     </td>
                     <td style={{ 
-                      backgroundColor: 'var(--color-surface)',
-                      padding: '6px 8px',
+                      backgroundColor: row.baseline === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                      padding: '3px 4px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontSize: 'var(--text-xs)'
+                      fontSize: 'var(--text-xs)',
+                      color: row.baseline === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
                     }}>
                       {row.baseline}
                     </td>
                     <td style={{ 
-                      backgroundColor: 'var(--color-surface)',
-                      padding: '6px 8px',
+                      backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'feb' 
+                        ? '#fbbf24' : row.feb2024 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                      padding: '3px 4px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontSize: 'var(--text-xs)'
+                      fontSize: 'var(--text-xs)',
+                      color: row.feb2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
                     }}>
                       {row.feb2024}
                     </td>
                     <td style={{ 
-                      backgroundColor: 'var(--color-surface)',
-                      padding: '6px 8px',
+                      backgroundColor: '#dbeafe', // Light blue
+                      padding: '3px 4px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontSize: 'var(--text-xs)'
+                      fontSize: 'var(--text-xs)',
+                      color: 'white',
+                      fontWeight: '600'
+                    }}>
+                      <span style={{
+                        backgroundColor: row.febChange === '#N/A' ? '#6b7280' : getPercentageColor(row.febChange),
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        display: 'inline-block',
+                        minWidth: '40px'
+                      }}>
+                        {row.febChange}
+                      </span>
+                    </td>
+                    <td style={{ 
+                      backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'aug' 
+                        ? '#fbbf24' : row.aug2024 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                      padding: '3px 4px',
+                      border: '1px solid var(--color-border)',
+                      textAlign: 'center',
+                      fontSize: 'var(--text-xs)',
+                      color: row.aug2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
                     }}>
                       {row.aug2024}
                     </td>
                     <td style={{ 
-                      backgroundColor: 'var(--color-surface)',
-                      padding: '6px 8px',
+                      backgroundColor: '#dbeafe', // Light blue
+                      padding: '3px 4px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontSize: 'var(--text-xs)'
+                      fontSize: 'var(--text-xs)',
+                      color: 'white',
+                      fontWeight: '600'
+                    }}>
+                      <span style={{
+                        backgroundColor: row.augChange === '#N/A' ? '#6b7280' : getPercentageColor(row.augChange),
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        display: 'inline-block',
+                        minWidth: '40px'
+                      }}>
+                        {row.augChange}
+                      </span>
+                    </td>
+                    <td style={{ 
+                      backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'mar' 
+                        ? '#fbbf24' : row.mar2025 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                      padding: '3px 4px',
+                      border: '1px solid var(--color-border)',
+                      textAlign: 'center',
+                      fontSize: 'var(--text-xs)',
+                      color: row.mar2025 === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
                     }}>
                       {row.mar2025}
                     </td>
                     <td style={{ 
-                      backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'feb' 
-                        ? '#fbbf24' : '#dbeafe', // Highlight yellow if hovered, otherwise light blue
-                      padding: '6px 8px',
+                      backgroundColor: '#dbeafe', // Light blue
+                      padding: '3px 4px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontWeight: '500',
                       fontSize: 'var(--text-xs)',
-                      transition: 'background-color 0.2s ease'
+                      color: 'white',
+                      fontWeight: '600'
                     }}>
-                      {row.febChange}
-                    </td>
-                    <td style={{ 
-                      backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'aug' 
-                        ? '#fbbf24' : '#dbeafe', // Highlight yellow if hovered, otherwise light blue
-                      padding: '6px 8px',
-                      border: '1px solid var(--color-border)',
-                      textAlign: 'center',
-                      fontWeight: '500',
-                      fontSize: 'var(--text-xs)',
-                      transition: 'background-color 0.2s ease'
-                    }}>
-                      {row.augChange}
-                    </td>
-                    <td style={{ 
-                      backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'mar' 
-                        ? '#fbbf24' : '#dbeafe', // Highlight yellow if hovered, otherwise light blue
-                      padding: '6px 8px',
-                      border: '1px solid var(--color-border)',
-                      textAlign: 'center',
-                      fontWeight: '500',
-                      fontSize: 'var(--text-xs)',
-                      transition: 'background-color 0.2s ease'
-                    }}>
-                      {row.marChange}
+                      <span style={{
+                        backgroundColor: row.marChange === '#N/A' ? '#6b7280' : getPercentageColor(row.marChange),
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        display: 'inline-block',
+                        minWidth: '40px'
+                      }}>
+                        {row.marChange}
+                      </span>
                     </td>
                   </tr>
                 ))}

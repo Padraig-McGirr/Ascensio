@@ -5,7 +5,7 @@ interface LineChartData {
   changes: { [date: string]: number | null };
 }
 
-interface PercentageLineChartProps {
+interface ResultsTableLineChartProps {
   onHover?: (cell: { biomarker: string; column: string } | null) => void;
   hoveredCell?: { biomarker: string; column: string } | null;
   chartHover?: {
@@ -20,9 +20,18 @@ interface PercentageLineChartProps {
   }) => void;
   timeframe?: string;
   selectedBiomarkerGroups?: Set<string>;
+  selectedTimeRange?: string;
 }
 
-export const PercentageLineChart: React.FC<PercentageLineChartProps> = ({ onHover, hoveredCell, chartHover, onChartHover, timeframe = 'last2', selectedBiomarkerGroups }) => {
+export const ResultsTableLineChart: React.FC<ResultsTableLineChartProps> = ({ 
+  onHover, 
+  hoveredCell, 
+  chartHover, 
+  onChartHover, 
+  timeframe = 'last2', 
+  selectedBiomarkerGroups,
+  selectedTimeRange 
+}) => {
   const [selectedLines, setSelectedLines] = useState<string[]>(['Feb to Aug 2024', 'Aug 2024 to Mar 2025']);
   
   const [tooltip, setTooltip] = useState<{
@@ -185,11 +194,11 @@ export const PercentageLineChart: React.FC<PercentageLineChartProps> = ({ onHove
   // Use filtered biomarkers
   const filteredData = getFilteredBiomarkers();
 
-  const chartHeight = 300;
-  const chartWidth = 900;
-  const leftMargin = 60;
+  const chartHeight = 250; // Reduced chart height for Results Table
+  const chartWidth = 800; // Extended chart width for Results Table
+  const leftMargin = 80; // Increased left margin for Results Table
   const bottomMargin = 100;
-  const pointSpacing = filteredData.length > 1 ? (chartWidth - 200) / (filteredData.length - 1) : 100;
+  const pointSpacing = filteredData.length > 1 ? (chartWidth - 200) / (filteredData.length - 1) : 100; // Simple spacing calculation
   
   // Calculate Y-axis range
   const allValues = data.flatMap(item => 
@@ -325,7 +334,7 @@ export const PercentageLineChart: React.FC<PercentageLineChartProps> = ({ onHove
         {filteredData.map((item, index) => (
           <div key={index} style={{
             position: 'absolute',
-            left: (index * pointSpacing - 35) + 'px',
+            left: (10 + index * pointSpacing - 35) + 'px',
             top: chartHeight + 8 + 'px',
             width: '60px',
             textAlign: 'center',
@@ -349,7 +358,7 @@ export const PercentageLineChart: React.FC<PercentageLineChartProps> = ({ onHove
             const value = item.changes[period.toDate];
             if (value === null) return null;
             return {
-              x: index * pointSpacing,
+              x: 10 + (index * pointSpacing), // Close to x-axis start for Results Table
               y: getYPosition(value),
               value,
               biomarker: item.biomarker

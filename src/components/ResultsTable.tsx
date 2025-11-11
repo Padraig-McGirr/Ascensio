@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { PercentageBarChart } from './PercentageBarChart';
-import { PercentageLineChart } from './PercentageLineChart';
+import { ResultsTableBarChart } from './ResultsTableBarChart';
+import { ResultsTableLineChart } from './ResultsTableLineChart';
+import { getBloodRangeColor } from '../utils/bloodRangeColors';
 
 export const ResultsTable: React.FC = () => {
   // Hover state for highlighting
@@ -8,6 +9,20 @@ export const ResultsTable: React.FC = () => {
     biomarker: string;
     column: string;
   } | null>(null);
+
+  // Filter states - same as OverviewPage
+  const [selectedTimeRange, setSelectedTimeRange] = useState<string>('last2');
+  const [selectedBiomarkerGroups, setSelectedBiomarkerGroups] = useState<Set<string>>(new Set(['whiteBloodCells', 'redBloodCells', 'liverFunction', 'lipidProfile', 'kidneyFunction', 'bloodSugarTshPsa']));
+
+  const toggleBiomarkerGroup = (groupId: string) => {
+    const newSelected = new Set(selectedBiomarkerGroups);
+    if (newSelected.has(groupId)) {
+      newSelected.delete(groupId);
+    } else {
+      newSelected.add(groupId);
+    }
+    setSelectedBiomarkerGroups(newSelected);
+  };
 
   // Data from CSV file
   const tableData = [
@@ -59,6 +74,51 @@ export const ResultsTable: React.FC = () => {
     return '#eab308'; // Yellow
   };
 
+  // Helper function to extract biomarker name for color matching
+  const getBiomarkerKey = (fullName: string): string => {
+    // Extract key parts of biomarker name for matching with blood ranges
+    const upperName = fullName.toUpperCase();
+    if (upperName.includes('LEUCOCYTES')) return 'LEUCOCYTES';
+    if (upperName.includes('NEUTROPHILS')) return 'NEUTROPHILS';
+    if (upperName.includes('LYMPHOCYTES')) return 'LYMPHOCYTES';
+    if (upperName.includes('MONOCYTES')) return 'MONOCYTES';
+    if (upperName.includes('EOSINOPHILS')) return 'EOSINOPHILS';
+    if (upperName.includes('BASOPHILS')) return 'BASOPHILS';
+    if (upperName.includes('PLATELETS')) return 'PLATELETS';
+    if (upperName.includes('RBC')) return 'RBC';
+    if (upperName.includes('HAEMOGLOBIN')) return 'HAEMOGLOBIN';
+    if (upperName.includes('HAEMATOCRIT')) return 'HAEMATOCRIT';
+    if (upperName.includes('MCV')) return 'MCV';
+    if (upperName.includes('MCH')) return 'MCH';
+    if (upperName.includes('MCHC')) return 'MCHC';
+    if (upperName.includes('ALT')) return 'ALT';
+    if (upperName.includes('BILIRUBIN')) return 'BILIRUBIN';
+    if (upperName.includes('ALKALINE')) return 'ALP';
+    if (upperName.includes('GAMMA')) return 'GAMMA GT';
+    if (upperName.includes('PROTEINS')) return 'PROTEINS';
+    if (upperName.includes('ALBUMIN')) return 'ALBUMIN';
+    if (upperName.includes('CHOLESTEROL (TOTAL)')) return 'CHOLESTEROL';
+    if (upperName.includes('TRIGLYCERIDES')) return 'TRIGLYCERIDES';
+    // Explicit check for NON HDL CHOLESTEROL
+    if (upperName.includes('NON HDL CHOLESTEROL')) return 'NON-HDL';
+    if (upperName.includes('HDL')) return 'HDL';
+    if (upperName.includes('LDL')) return 'LDL';
+    if (upperName.includes('UREA')) return 'UREA';
+    if (upperName.includes('CREATININE')) return 'CREATININE';
+    if (upperName.includes('eGFR')) return 'eGFR';
+    if (upperName.includes('SODIUM')) return 'SODIUM';
+    if (upperName.includes('POTASSIUM')) return 'POTASSIUM';
+    if (upperName.includes('CHLORIDE')) return 'CHLORIDE';
+    if (upperName.includes('CALCIUM')) return 'CALCIUM';
+    if (upperName.includes('PHOSPHOROUS')) return 'PHOSPHOROUS';
+    if (upperName.includes('MAGNESIUM')) return 'MAGNESIUM';
+    if (upperName.includes('GLUCOSE')) return 'GLUCOSE';
+    if (upperName.includes('HbA1c')) return 'HbA1c';
+    if (upperName.includes('TSH')) return 'TSH';
+    if (upperName.includes('PSA')) return 'PSA';
+    return fullName;
+  };
+
   return (
     <div style={{ 
       padding: '0',
@@ -73,7 +133,7 @@ export const ResultsTable: React.FC = () => {
       {/* Main Content Grid */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: '2.5fr 0.5fr', 
+        gridTemplateColumns: '1fr 1fr', 
         gap: '12px',
         height: '100vh',
         width: '100%',
@@ -230,23 +290,25 @@ export const ResultsTable: React.FC = () => {
                       {row.biomarker}
                     </td>
                     <td style={{ 
-                      backgroundColor: row.baseline === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                      backgroundColor: row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.baseline),
                       padding: '3px 4px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
                       fontSize: 'var(--text-xs)',
-                      color: row.baseline === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
+                      color: row.baseline === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
+                      fontWeight: '600'
                     }}>
                       {row.baseline}
                     </td>
                     <td style={{ 
                       backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'feb' 
-                        ? '#fbbf24' : row.feb2024 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                        ? '#3b82f6' : row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.feb2024),
                       padding: '3px 4px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
                       fontSize: 'var(--text-xs)',
-                      color: row.feb2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
+                      color: row.feb2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
+                      fontWeight: '600'
                     }}>
                       {row.feb2024}
                     </td>
@@ -260,7 +322,7 @@ export const ResultsTable: React.FC = () => {
                       fontWeight: '600'
                     }}>
                       <span style={{
-                        backgroundColor: row.febChange === '#N/A' ? '#6b7280' : getPercentageColor(row.febChange),
+                        backgroundColor: row.feb2024 === '#N/A' ? '#6b7280' : (row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.feb2024)),
                         padding: '2px 6px',
                         borderRadius: '3px',
                         display: 'inline-block',
@@ -271,12 +333,13 @@ export const ResultsTable: React.FC = () => {
                     </td>
                     <td style={{ 
                       backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'aug' 
-                        ? '#fbbf24' : row.aug2024 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                        ? '#3b82f6' : row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.aug2024),
                       padding: '3px 4px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
                       fontSize: 'var(--text-xs)',
-                      color: row.aug2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
+                      color: row.aug2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
+                      fontWeight: '600'
                     }}>
                       {row.aug2024}
                     </td>
@@ -290,7 +353,7 @@ export const ResultsTable: React.FC = () => {
                       fontWeight: '600'
                     }}>
                       <span style={{
-                        backgroundColor: row.augChange === '#N/A' ? '#6b7280' : getPercentageColor(row.augChange),
+                        backgroundColor: row.aug2024 === '#N/A' ? '#6b7280' : (row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.aug2024)),
                         padding: '2px 6px',
                         borderRadius: '3px',
                         display: 'inline-block',
@@ -301,12 +364,13 @@ export const ResultsTable: React.FC = () => {
                     </td>
                     <td style={{ 
                       backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'mar' 
-                        ? '#fbbf24' : row.mar2025 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                        ? '#3b82f6' : row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.mar2025),
                       padding: '3px 4px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
                       fontSize: 'var(--text-xs)',
-                      color: row.mar2025 === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
+                      color: row.mar2025 === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
+                      fontWeight: '600'
                     }}>
                       {row.mar2025}
                     </td>
@@ -320,7 +384,7 @@ export const ResultsTable: React.FC = () => {
                       fontWeight: '600'
                     }}>
                       <span style={{
-                        backgroundColor: row.marChange === '#N/A' ? '#6b7280' : getPercentageColor(row.marChange),
+                        backgroundColor: row.mar2025 === '#N/A' ? '#6b7280' : (row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.mar2025)),
                         padding: '2px 6px',
                         borderRadius: '3px',
                         display: 'inline-block',
@@ -340,59 +404,170 @@ export const ResultsTable: React.FC = () => {
         <div style={{ 
           display: 'flex', 
           flexDirection: 'column', 
-          gap: '16px'
+          gap: '20px',
+          height: '100%'
         }}>
+          
+          {/* Filter Section */}
+          <div style={{
+            backgroundColor: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
+            borderRadius: '8px',
+            padding: '16px',
+            margin: '0 0 1px 0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '24px'
+          }}>
+            {/* Time Range Filters */}
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              alignItems: 'center'
+            }}>
+              {['last2', 'last3', 'last4'].map((range) => (
+                  <button 
+                    key={range}
+                    onClick={() => setSelectedTimeRange(range)}
+                    style={{
+                      padding: '8px 16px',
+                      fontSize: 'var(--text-sm)',
+                      fontWeight: '500',
+                      borderRadius: '6px',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: selectedTimeRange === range ? 'var(--color-primary)' : 'transparent',
+                      color: selectedTimeRange === range ? 'white' : 'var(--color-text-secondary)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedTimeRange !== range) {
+                        e.currentTarget.style.backgroundColor = 'var(--color-primary-50)';
+                        e.currentTarget.style.color = 'var(--color-primary)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedTimeRange !== range) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = 'var(--color-text-secondary)';
+                      }
+                    }}
+                  >
+                    Last {range.slice(-1)} tests
+                  </button>
+              ))}
+            </div>
+
+            {/* Biomarker Group Filters */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateRows: 'repeat(2, 1fr)',
+              gap: '4px',
+              alignItems: 'center'
+            }}>
+              {[
+                { id: 'whiteBloodCells', label: 'WBC & Platelets' },
+                { id: 'redBloodCells', label: 'Red Blood Cells' },
+                { id: 'liverFunction', label: 'Liver Function' },
+                { id: 'lipidProfile', label: 'Lipid Profile' },
+                { id: 'kidneyFunction', label: 'Kidney Function' },
+                { id: 'bloodSugarTshPsa', label: 'Blood Sugar + TSH + PSA' }
+              ].map((group) => (
+                <button 
+                  key={group.id}
+                  onClick={() => toggleBiomarkerGroup(group.id)}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '10px',
+                    fontWeight: '500',
+                    borderRadius: '6px',
+                    border: '1px solid var(--color-border)',
+                    backgroundColor: selectedBiomarkerGroups.has(group.id) ? 'var(--color-primary)' : 'transparent',
+                    color: selectedBiomarkerGroups.has(group.id) ? 'white' : 'var(--color-text-secondary)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    whiteSpace: 'nowrap'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!selectedBiomarkerGroups.has(group.id)) {
+                      e.currentTarget.style.backgroundColor = 'var(--color-primary-50)';
+                      e.currentTarget.style.color = 'var(--color-primary)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!selectedBiomarkerGroups.has(group.id)) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = 'var(--color-text-secondary)';
+                    }
+                  }}
+                >
+                  {group.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          
           {/* Bar Chart */}
           <div style={{ 
-            flex: '1',
+            height: '420px',
             backgroundColor: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
             borderRadius: '8px',
             padding: '8px',
-            margin: '0'
+            margin: '0',
+            overflow: 'hidden'
           }}>
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '8px' }}>
               <h2 style={{ 
-                fontSize: 'var(--text-xl)', 
+                fontSize: 'var(--text-lg)', 
                 fontWeight: '600', 
                 color: 'var(--color-text-primary)',
-                marginBottom: '8px',
+                marginBottom: '4px',
                 textAlign: 'center'
               }}>
                 Percentage Change in Blood Results from Previous Measurement
               </h2>
             </div>
             
-            <PercentageBarChart 
+            <ResultsTableBarChart 
               onHover={setHoveredCell}
               hoveredCell={hoveredCell}
+              selectedBiomarkerGroups={selectedBiomarkerGroups}
+              selectedTimeRange={selectedTimeRange}
+              timeframe={selectedTimeRange}
             />
           </div>
 
           {/* Line Chart */}
           <div style={{ 
-            flex: '1',
+            height: '420px',
             backgroundColor: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
             borderRadius: '8px',
             padding: '8px',
-            margin: '0'
+            margin: '0',
+            overflow: 'hidden'
           }}>
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '8px' }}>
               <h2 style={{ 
-                fontSize: 'var(--text-xl)', 
+                fontSize: 'var(--text-lg)', 
                 fontWeight: '600', 
                 color: 'var(--color-text-primary)',
-                marginBottom: '8px',
+                marginBottom: '4px',
                 textAlign: 'center'
               }}>
-                Percentage Change in Blood Results over last 3 Measurements
+                Percentage Change in Blood Results
               </h2>
             </div>
             
-            <PercentageLineChart 
+            <ResultsTableLineChart 
               onHover={setHoveredCell}
               hoveredCell={hoveredCell}
+              selectedBiomarkerGroups={selectedBiomarkerGroups}
+              selectedTimeRange={selectedTimeRange}
+              timeframe={selectedTimeRange}
             />
           </div>
         </div>

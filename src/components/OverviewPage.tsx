@@ -1,147 +1,180 @@
 import React from 'react';
 import { PercentageBarChart } from './PercentageBarChart';
 import { PercentageLineChart } from './PercentageLineChart';
+import { getBloodRangeColor } from '../utils/bloodRangeColors';
 
 interface OverviewPageProps {
   onNavigate?: (page: string) => void;
 }
 
 export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => {
-  // Biomarker data for color coding
-  const biomarkerData = {
-    whiteBloodCells: {
-      biomarkers: ['LEUCOCYTES', 'NEUTROPHILS', 'LYMPHOCYTES', 'MONOCYTES', 'EOSINOPHILS', 'BASOPHILS', 'PLATELETS'],
-      changes: { 'LEUCOCYTES': 23, 'NEUTROPHILS': 14, 'LYMPHOCYTES': 8, 'MONOCYTES': 11, 'EOSINOPHILS': 86, 'BASOPHILS': 100, 'PLATELETS': 13 },
-      gridColumns: 'repeat(4, 1fr)'
+  const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(new Set(['whiteBloodCells', 'redBloodCells', 'liverFunction', 'lipidProfile', 'kidneyFunction', 'bloodSugarTshPsa']));
+  
+  // Shared hover state for both charts
+  const [chartHover, setChartHover] = React.useState<{
+    x: number;
+    biomarkerIndex: number;
+    visible: boolean;
+  }>({
+    x: 0,
+    biomarkerIndex: -1,
+    visible: false
+  });
+
+  // Chart filter state
+  const [selectedTimeRange, setSelectedTimeRange] = React.useState<string>('last2');
+  const [selectedBiomarkerGroups, setSelectedBiomarkerGroups] = React.useState<Set<string>>(new Set(['whiteBloodCells', 'redBloodCells', 'liverFunction', 'lipidProfile', 'kidneyFunction', 'bloodSugarTshPsa']));
+
+  // Biomarker data with actual values and changes
+  const biomarkerGroups = [
+    {
+      id: 'whiteBloodCells',
+      title: 'WHITE BLOOD CELLS AND PLATELETS',
+      navigationKey: 'white-blood-cells',
+biomarkers: [
+        // Using most recent test values and "Last 2 tests" percentage changes
+        { name: 'BASOPHILS (X10*9)', result: '0.04', change: 0 }, // aug2024 value, aug->mar change
+        { name: 'EOSINOPHILS (X10*9)', result: '0.26', change: null }, // aug2024 value, aug->mar change is null (mar2025 = #N/A)
+        { name: 'LEUCOCYTES (X10*9)', result: '4.4', change: -23 }, // mar2025 value, aug->mar change
+        { name: 'LYMPHOCYTES (X10*9)', result: '1.22', change: null }, // aug2024 value, aug->mar change is null
+        { name: 'MONOCYTES (X10*9)', result: '0.5', change: null }, // aug2024 value, aug->mar change is null
+        { name: 'NEUTROPHILS (X10*9)', result: '3.72', change: null }, // aug2024 value, aug->mar change is null
+        { name: 'PLATELETS (X10*9)', result: '266', change: -13 } // mar2025 value, aug->mar change
+      ]
     },
-    redBloodCells: {
-      biomarkers: ['RBC', 'HAEMOGLOBIN', 'HAEMATOCRIT', 'MCV', 'MCH', 'MCHC'],
-      changes: { 'RBC': 2, 'HAEMOGLOBIN': 2, 'HAEMATOCRIT': 0, 'MCV': 2, 'MCH': 1, 'MCHC': 1 },
-      gridColumns: 'repeat(3, 1fr)'
+    {
+      id: 'redBloodCells',
+      title: 'RED BLOOD CELLS',
+      navigationKey: 'red-blood-cells',
+      biomarkers: [
+        { name: 'RBC (X10*12)', result: '4.49', change: 2 }, // mar2025 value, aug->mar change
+        { name: 'HAEMOGLOBIN (g/dl)', result: '13', change: 2 }, // mar2025 value, aug->mar change
+        { name: 'HAEMATOCRIT (L/L)', result: '0.41', change: 0 }, // mar2025 value, aug->mar change
+        { name: 'MCV (fl)', result: '90.6', change: -2 }, // mar2025 value, aug->mar change
+        { name: 'MCH (pg)', result: '29', change: -1 }, // mar2025 value, aug->mar change
+        { name: 'MCHC (g/dl)', result: '31.9', change: 1 } // mar2025 value, aug->mar change
+      ]
     },
-    liverFunction: {
-      biomarkers: ['ALT', 'BILIRUBIN', 'ALKALINE PHOSPHATE', 'GAMMA GT', 'TOTAL PROTEINS', 'ALBUMIN'],
-      changes: { 'ALT': 29, 'BILIRUBIN': 44, 'ALKALINE PHOSPHATE': 23, 'GAMMA GT': 26, 'TOTAL PROTEINS': 0, 'ALBUMIN': 2 },
-      gridColumns: 'repeat(3, 1fr)'
+    {
+      id: 'liverFunction',
+      title: 'LIVER FUNCTION',
+      navigationKey: 'liver-function',
+      biomarkers: [
+        { name: 'ALT (U/L)', result: '20', change: -29 }, // mar2025 value, aug->mar change
+        { name: 'BILIRUBIN TOTAL (UMOL/L)', result: '9.5', change: 44 }, // mar2025 value, aug->mar change  
+        { name: 'ALKALINE PHOSPHATASE( IU/L)', result: '70', change: -23 }, // mar2025 value, aug->mar change
+        { name: 'GAMMA GT (U/L)', result: '32', change: -26 }, // mar2025 value, aug->mar change
+        { name: 'TOTAL PROTEINS (G/L)', result: '77', change: 0 }, // mar2025 value, aug->mar change
+        { name: 'ALBUMIN (G/L))', result: '47', change: 2 } // mar2025 value, aug->mar change
+      ]
     },
-    lipidProfile: {
-      biomarkers: ['CHOLESTEROL (TOTAL)', 'TRIGLYCERIDES', 'CHOLESTEROL HDL', 'CHOLESTEROL LDL', 'Non HDL CHOLESTEROL'],
-      changes: { 'CHOLESTEROL (TOTAL)': 0, 'TRIGLYCERIDES': 8, 'CHOLESTEROL HDL': 5, 'CHOLESTEROL LDL': 2, 'Non HDL CHOLESTEROL': 4 },
-      gridColumns: 'repeat(2, 1fr)'
+    {
+      id: 'lipidProfile',
+      title: 'LIPID PROFILE',
+      navigationKey: 'lipid-profile',
+      biomarkers: [
+        { name: 'CHOLESTEROL (TOTAL)mmol/L', result: '4.6', change: 0 }, // mar2025 value, aug->mar change
+        { name: 'TRIGLYCERIDES (mmol / L)', result: '1.43', change: 8 }, // mar2025 value, aug->mar change
+        { name: 'CHOLESTEROL HDL (mmol / L)', result: '1.76', change: -5 }, // mar2025 value, aug->mar change
+        { name: 'CHOLESTEROL LDL (mmol/L)', result: '2.19', change: 2 }, // mar2025 value, aug->mar change
+        { name: 'non HDL CHOLESTEROL (mmol/L)', result: '2.84', change: 4 } // mar2025 value, aug->mar change
+      ]
     },
-    kidneyFunction: {
-      biomarkers: ['UREA', 'CREATININE', 'Egfr', 'SODIUM', 'POTASSIUM', 'CHLORIDE', 'CALCIUM', 'PHOSPHOROUS', 'MAGNESIUM'],
-      changes: { 'UREA': 18, 'CREATININE': 6, 'Egfr': 6, 'SODIUM': 0, 'POTASSIUM': 0, 'CHLORIDE': 0, 'CALCIUM': 0, 'PHOSPHOROUS': 0, 'MAGNESIUM': 0 },
-      gridColumns: 'repeat(3, 1fr)'
+    {
+      id: 'kidneyFunction',
+      title: 'KIDNEY FUNCTION',
+      navigationKey: 'kidney-function',
+      biomarkers: [
+        { name: 'UREA (mmol / L)', result: '5.2', change: 18 }, // mar2025 value, aug->mar change
+        { name: 'CREATININE (umol/L)', result: '61', change: -6 }, // mar2025 value, aug->mar change
+        { name: 'eGFR (Ml/min/1.73m2', result: '89', change: 6 } // mar2025 value, aug->mar change
+      ]
     },
-    bloodSugarTshPsa: {
-      biomarkers: ['GLUCOSE', 'HBA1C', 'TSH', 'PSA'],
-      changes: { 'GLUCOSE': 0, 'HBA1C': 0, 'TSH': 37, 'PSA': 0 },
-      gridColumns: 'repeat(2, 1fr)'
+    {
+      id: 'bloodSugarTshPsa',
+      title: 'BLOOD SUGAR + TSH + PSA',
+      navigationKey: 'blood-sugar-tsh-psa',
+      biomarkers: [
+        { name: 'GLUCOSE MMOL/L', result: '#N/A', change: null }, // mar2025 value, aug->mar change
+        { name: 'HbA1c', result: '#N/A', change: null }, // mar2025 value, aug->mar change  
+        { name: 'TSH', result: '0.493', change: 37 }, // mar2025 value, aug->mar change
+        { name: 'PSA', result: '#N/A', change: null } // mar2025 value, aug->mar change
+      ]
     }
+  ];
+
+  const toggleGroup = (groupId: string) => {
+    const newExpanded = new Set(expandedGroups);
+    if (newExpanded.has(groupId)) {
+      newExpanded.delete(groupId);
+    } else {
+      newExpanded.add(groupId);
+    }
+    setExpandedGroups(newExpanded);
+  };
+
+  const toggleBiomarkerGroup = (groupId: string) => {
+    const newSelected = new Set(selectedBiomarkerGroups);
+    if (newSelected.has(groupId)) {
+      newSelected.delete(groupId);
+    } else {
+      newSelected.add(groupId);
+    }
+    setSelectedBiomarkerGroups(newSelected);
   };
 
   // Function to determine background color based on percentage change
-  const getBiomarkerColor = (changeValue: number): string => {
-    if (changeValue > 100) {
+  const getPercentageChangeColor = (changeValue: number | null): string => {
+    if (changeValue === null) return '#6b7280'; // Gray for null values
+    const absValue = Math.abs(changeValue);
+    if (absValue > 100) {
       return '#dc2626'; // Red solid
-    } else if (changeValue > 75) {
+    } else if (absValue > 75) {
       return '#7c3aed'; // Purple solid
-    } else if (changeValue > 25) {
+    } else if (absValue > 25) {
       return '#059669'; // Green solid
     } else {
       return '#fbbf24'; // Yellow solid
     }
   };
 
-  // Component for rendering biomarker grid
-  const BiomarkerGrid: React.FC<{
-    biomarkers: string[];
-    changes: Record<string, number>;
-    gridColumns: string;
-  }> = ({ biomarkers, changes, gridColumns }) => (
-    <div style={{ 
-      display: 'grid', 
-      gridTemplateColumns: gridColumns, 
-      gap: '4px'
-    }}>
-      {biomarkers.map((label, index) => {
-        const changeValue = changes[label] || 0;
-        const backgroundColor = getBiomarkerColor(changeValue);
-        
-        return (
-          <div 
-            key={index} 
-            style={{ 
-              height: '24px',
-              backgroundColor: backgroundColor,
-              borderRadius: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '10px',
-              fontWeight: '700',
-              color: 'white',
-              padding: '2px',
-              position: 'relative',
-              zIndex: 10,
-              border: '1px solid rgba(255, 255, 255, 0.2)'
-            }}
-          >
-            {label}
-          </div>
-        );
-      })}
-    </div>
-  );
-
-  // Component for KPI button
-  const KPIButton: React.FC<{
-    title: string;
-    navigationKey: string;
-    biomarkerData: {
-      biomarkers: string[];
-      changes: Record<string, number>;
-      gridColumns: string;
-    };
-  }> = ({ title, navigationKey, biomarkerData }) => (
-    <button 
-      onClick={() => onNavigate?.(navigationKey)}
-      style={{ 
-        backgroundColor: 'var(--color-primary)',
-        color: 'white',
-        border: 'none',
-        borderRadius: '8px',
-        padding: '12px',
-        margin: '0',
-        cursor: 'pointer',
-        transition: 'all 0.2s ease',
-        width: '100%'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'var(--color-primary-dark)';
-        e.currentTarget.style.transform = 'translateY(-1px)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'var(--color-primary)';
-        e.currentTarget.style.transform = 'translateY(0)';
-      }}
-    >
-      <h4 style={{ 
-        fontSize: 'var(--text-sm)', 
-        fontWeight: '600',
-        margin: '0 0 12px 0',
-        textAlign: 'center'
-      }}>
-        {title}
-      </h4>
-      <BiomarkerGrid 
-        biomarkers={biomarkerData.biomarkers}
-        changes={biomarkerData.changes}
-        gridColumns={biomarkerData.gridColumns}
-      />
-    </button>
-  );
+  // Helper function to extract biomarker key for color matching
+  const getBiomarkerKey = (fullName: string): string => {
+    const upperName = fullName.toUpperCase();
+    if (upperName.includes('LEUCOCYTES')) return 'LEUCOCYTES';
+    if (upperName.includes('NEUTROPHILS')) return 'NEUTROPHILS';
+    if (upperName.includes('LYMPHOCYTES')) return 'LYMPHOCYTES';
+    if (upperName.includes('MONOCYTES')) return 'MONOCYTES';
+    if (upperName.includes('EOSINOPHILS')) return 'EOSINOPHILS';
+    if (upperName.includes('BASOPHILS')) return 'BASOPHILS';
+    if (upperName.includes('PLATELETS')) return 'PLATELETS';
+    if (upperName.includes('RBC')) return 'RBC';
+    if (upperName.includes('HAEMOGLOBIN')) return 'HAEMOGLOBIN';
+    if (upperName.includes('HAEMATOCRIT')) return 'HAEMATOCRIT';
+    if (upperName.includes('MCV')) return 'MCV';
+    if (upperName.includes('MCH')) return 'MCH';
+    if (upperName.includes('MCHC')) return 'MCHC';
+    if (upperName.includes('ALT')) return 'ALT';
+    if (upperName.includes('BILIRUBIN')) return 'BILIRUBIN';
+    if (upperName.includes('ALKALINE')) return 'ALP';
+    if (upperName.includes('GAMMA')) return 'GAMMA GT';
+    if (upperName.includes('PROTEINS')) return 'PROTEINS';
+    if (upperName.includes('ALBUMIN')) return 'ALBUMIN';
+    if (upperName.includes('CHOLESTEROL (TOTAL)')) return 'CHOLESTEROL';
+    if (upperName.includes('TRIGLYCERIDES')) return 'TRIGLYCERIDES';
+    // Explicit check for NON HDL CHOLESTEROL
+    if (upperName.includes('NON HDL CHOLESTEROL')) return 'NON-HDL';
+    if (upperName.includes('HDL')) return 'HDL';
+    if (upperName.includes('LDL')) return 'LDL';
+    if (upperName.includes('UREA')) return 'UREA';
+    if (upperName.includes('CREATININE')) return 'CREATININE';
+    if (upperName.includes('eGFR')) return 'eGFR';
+    if (upperName.includes('GLUCOSE')) return 'GLUCOSE';
+    if (upperName.includes('HbA1c')) return 'HbA1c';
+    if (upperName.includes('TSH')) return 'TSH';
+    if (upperName.includes('PSA')) return 'PSA';
+    return fullName;
+  };
 
   return (
     <div style={{ 
@@ -159,7 +192,6 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => {
         display: 'grid', 
         gridTemplateColumns: '2fr 1fr', 
         gap: '1px',
-        height: 'calc(100vh - 50px)',
         width: '100%',
         padding: '0 8px 0 0',
         margin: '0'
@@ -172,27 +204,133 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => {
           gap: '1px'
         }}>
           
+          {/* Filter Section */}
+          <div style={{
+            backgroundColor: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
+            borderRadius: '8px',
+            padding: '16px',
+            margin: '0 0 1px 0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '24px'
+          }}>
+            {/* Time Range Filters */}
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              alignItems: 'center'
+            }}>
+              {['last2', 'last3', 'last4'].map((range) => (
+                  <button 
+                    key={range}
+                    onClick={() => setSelectedTimeRange(range)}
+                    style={{
+                      padding: '8px 16px',
+                      fontSize: 'var(--text-sm)',
+                      fontWeight: '500',
+                      borderRadius: '6px',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: selectedTimeRange === range ? 'var(--color-primary)' : 'transparent',
+                      color: selectedTimeRange === range ? 'white' : 'var(--color-text-secondary)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedTimeRange !== range) {
+                        e.currentTarget.style.backgroundColor = 'var(--color-primary-50)';
+                        e.currentTarget.style.color = 'var(--color-primary)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedTimeRange !== range) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = 'var(--color-text-secondary)';
+                      }
+                    }}
+                  >
+                    Last {range.slice(-1)} tests
+                  </button>
+              ))}
+            </div>
+
+            {/* Biomarker Group Filters */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateRows: 'repeat(2, 1fr)',
+              gap: '4px',
+              alignItems: 'center'
+            }}>
+              {[
+                { id: 'whiteBloodCells', label: 'WBC & Platelets' },
+                { id: 'redBloodCells', label: 'Red Blood Cells' },
+                { id: 'liverFunction', label: 'Liver Function' },
+                { id: 'lipidProfile', label: 'Lipid Profile' },
+                { id: 'kidneyFunction', label: 'Kidney Function' },
+                { id: 'bloodSugarTshPsa', label: 'Blood Sugar + TSH + PSA' }
+              ].map((group) => (
+                <button 
+                  key={group.id}
+                  onClick={() => toggleBiomarkerGroup(group.id)}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '10px',
+                    fontWeight: '500',
+                    borderRadius: '6px',
+                    border: '1px solid var(--color-border)',
+                    backgroundColor: selectedBiomarkerGroups.has(group.id) ? 'var(--color-primary)' : 'transparent',
+                    color: selectedBiomarkerGroups.has(group.id) ? 'white' : 'var(--color-text-secondary)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    whiteSpace: 'nowrap'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!selectedBiomarkerGroups.has(group.id)) {
+                      e.currentTarget.style.backgroundColor = 'var(--color-primary-50)';
+                      e.currentTarget.style.color = 'var(--color-primary)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!selectedBiomarkerGroups.has(group.id)) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = 'var(--color-text-secondary)';
+                    }
+                  }}
+                >
+                  {group.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          
           {/* Top Chart - Percentage Change Bar Graph */}
           <div style={{ 
-            flex: '0 0 45%',
+            flex: '0 0 26%', // 5% reduction to give bottom graph more space
             backgroundColor: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
             borderRadius: '8px',
             padding: '8px',
             margin: '0'
           }}>
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '8px' }}>
               <h2 style={{ 
                 fontSize: 'var(--text-xl)', 
                 fontWeight: '600', 
                 color: 'var(--color-text-primary)',
-                marginBottom: '8px',
+                marginBottom: '4px',
                 textAlign: 'center'
               }}>
                 Percentage Change in Blood Results from Previous Measurement
               </h2>
             </div>
-            <PercentageBarChart />
+            <PercentageBarChart 
+              chartHover={chartHover}
+              onChartHover={setChartHover}
+              timeframe={selectedTimeRange}
+              selectedBiomarkerGroups={selectedBiomarkerGroups}
+            />
           </div>
 
           {/* Bottom Chart - Percentage Change Line Graph */}
@@ -204,110 +342,176 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => {
             padding: '8px',
             margin: '0'
           }}>
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '8px' }}>
               <h2 style={{ 
                 fontSize: 'var(--text-xl)', 
                 fontWeight: '600', 
                 color: 'var(--color-text-primary)',
-                marginBottom: '8px',
+                marginBottom: '4px',
                 textAlign: 'center'
               }}>
-                Percentage Change in Blood Results over last 3 Measurements
+                Percentage Change in Blood Results
               </h2>
             </div>
-            <PercentageLineChart />
+            <PercentageLineChart 
+              chartHover={chartHover}
+              onChartHover={setChartHover}
+              timeframe={selectedTimeRange}
+              selectedBiomarkerGroups={selectedBiomarkerGroups}
+            />
           </div>
         </div>
 
-        {/* Right Column - KPI Indicators Panel */}
+        {/* Right Column - KPI Table */}
         <div style={{ 
           display: 'flex', 
-          flexDirection: 'column', 
-          gap: '1px'
+          flexDirection: 'column',
+          backgroundColor: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          borderRadius: '8px',
+          overflow: 'visible'
         }}>
           
-          {/* KPI Panel Header */}
+
+          {/* Table Body */}
           <div style={{ 
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: '8px',
-            padding: '8px',
-            margin: '0'
+            flex: 'none',
+            overflow: 'visible' // Remove scroll restrictions to show all content
           }}>
-            <h3 style={{ 
-              fontSize: 'var(--text-lg)', 
-              fontWeight: '600', 
-              color: 'var(--color-text-primary)',
-              marginBottom: '8px',
-              textAlign: 'center'
-            }}>
-              Key Performance Indicators - Biomarker Status
-            </h3>
+            {biomarkerGroups.map((group) => (
+              <div key={group.id}>
+                {/* Group Header Row */}
+                <div 
+                  onClick={() => onNavigate?.(group.navigationKey)}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '2fr 1fr 1fr',
+                    backgroundColor: 'var(--color-primary)',
+                    color: 'white',
+                    cursor: 'pointer',
+                    borderBottom: '1px solid var(--color-border)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-primary-600)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                  }}
+                >
+                  <div style={{ 
+                    padding: '6px 14px', 
+                    borderRight: '1px solid rgba(255,255,255,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '11px',
+                    fontWeight: '600'
+                  }}>
+                    <span 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleGroup(group.id);
+                      }}
+                      style={{ cursor: 'pointer', fontSize: '11px' }}
+                    >
+                      {expandedGroups.has(group.id) ? '▼' : '▶'}
+                    </span>
+                    {group.title}
+                  </div>
+                  <div style={{ 
+                    padding: '6px 14px', 
+                    borderRight: '1px solid rgba(255,255,255,0.2)',
+                    textAlign: 'center',
+                    fontSize: '11px',
+                    fontWeight: '600'
+                  }}>
+                    {group.id === 'whiteBloodCells' ? 'Result' : ''}
+                  </div>
+                  <div style={{ 
+                    padding: '6px 14px',
+                    textAlign: 'center',
+                    fontSize: '11px',
+                    fontWeight: '600'
+                  }}>
+                    {group.id === 'whiteBloodCells' ? 'Δ PY %' : ''}
+                  </div>
+                </div>
+
+                {/* Biomarker Rows */}
+                {expandedGroups.has(group.id) && group.biomarkers.map((biomarker, index) => (
+                  <div 
+                    key={index}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '2fr 1fr 1fr',
+                      borderBottom: index < group.biomarkers.length - 1 ? '1px solid var(--color-border-light)' : 'none',
+                      fontSize: 'var(--text-xs)',
+                      transition: 'background-color 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--color-primary-25)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <div style={{ 
+                      padding: '4px 14px 4px 28px', 
+                      borderRight: '1px solid var(--color-border-light)',
+                      color: 'var(--color-text-secondary)',
+                      fontSize: '10px'
+                    }}>
+                      {biomarker.name}
+                    </div>
+                    <div style={{ 
+                      padding: '4px 10px', 
+                      borderRight: '1px solid var(--color-border-light)',
+                      textAlign: 'center',
+                      fontWeight: '600',
+                      backgroundColor: biomarker.name.includes('eGFR') ? '#6b7280' : (biomarker.name.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(biomarker.name), biomarker.result)),
+                      color: 'white',
+                      fontSize: '10px'
+                    }}>
+                      {biomarker.result}
+                    </div>
+                    <div style={{ 
+                      padding: '4px 10px',
+                      textAlign: 'center',
+                      fontWeight: '600',
+                      backgroundColor: biomarker.name.includes('eGFR') ? '#6b7280' : (biomarker.result === '#N/A' ? '#6b7280' : (biomarker.name.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(biomarker.name), biomarker.result))),
+                      color: 'white',
+                      fontSize: '10px'
+                    }}>
+                      {biomarker.change === null ? 'N/A' : `${biomarker.change > 0 ? '+' : ''}${biomarker.change.toFixed(1)}%`}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
-
-          {/* KPI Categories */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
-            
-            {/* White Blood Cells and Platelets */}
-            <KPIButton 
-              title="WHITE BLOOD CELLS AND PLATELETS"
-              navigationKey="white-blood-cells"
-              biomarkerData={biomarkerData.whiteBloodCells}
-            />
-
-            {/* Red Blood Cells */}
-            <KPIButton 
-              title="RED BLOOD CELLS"
-              navigationKey="red-blood-cells"
-              biomarkerData={biomarkerData.redBloodCells}
-            />
-
-            {/* Liver Function */}
-            <KPIButton 
-              title="LIVER FUNCTION"
-              navigationKey="liver-function"
-              biomarkerData={biomarkerData.liverFunction}
-            />
-
-            {/* Lipid Profile */}
-            <KPIButton 
-              title="LIPID PROFILE"
-              navigationKey="lipid-profile"
-              biomarkerData={biomarkerData.lipidProfile}
-            />
-
-            {/* Kidney Function */}
-            <KPIButton 
-              title="KIDNEY FUNCTION"
-              navigationKey="kidney-function"
-              biomarkerData={biomarkerData.kidneyFunction}
-            />
-
-            {/* Blood Sugar + TSH + PSA */}
-            <KPIButton 
-              title="BLOOD SUGAR + TSH + PSA"
-              navigationKey="blood-sugar-tsh-psa"
-              biomarkerData={biomarkerData.bloodSugarTshPsa}
-            />
-
-            {/* Compare Results Button */}
+          
+          {/* Compare Results Button */}
+          <div style={{
+            padding: '12px',
+            borderTop: '1px solid var(--color-border)',
+            backgroundColor: 'var(--color-surface)'
+          }}>
             <button 
               onClick={() => onNavigate?.('comparograph')}
               style={{ 
-                height: '60px',
+                width: '100%',
+                padding: '8px 16px',
                 backgroundColor: 'var(--color-secondary)',
                 color: 'white',
                 border: 'none',
-                borderRadius: '8px',
-                padding: '12px',
-                margin: '0',
+                borderRadius: '6px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                width: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 'var(--text-base)',
+                fontSize: 'var(--text-sm)',
                 fontWeight: '600',
                 boxShadow: 'var(--shadow-md)'
               }}

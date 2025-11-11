@@ -15,7 +15,7 @@ interface BarChartData {
   };
 }
 
-interface PercentageBarChartProps {
+interface ResultsTableBarChartProps {
   onHover?: (cell: { biomarker: string; column: string } | null) => void;
   hoveredCell?: { biomarker: string; column: string } | null;
   chartHover?: {
@@ -30,9 +30,18 @@ interface PercentageBarChartProps {
   }) => void;
   timeframe?: string;
   selectedBiomarkerGroups?: Set<string>;
+  selectedTimeRange?: string;
 }
 
-export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover, hoveredCell, chartHover, onChartHover, timeframe = 'last2', selectedBiomarkerGroups }) => {
+export const ResultsTableBarChart: React.FC<ResultsTableBarChartProps> = ({ 
+  onHover, 
+  hoveredCell, 
+  chartHover, 
+  onChartHover, 
+  timeframe = 'last2', 
+  selectedBiomarkerGroups,
+  selectedTimeRange 
+}) => {
   // Determine which bars to show based on timeframe
   const showMostRecent = timeframe === 'last2' || timeframe === 'last3' || timeframe === 'last4';
   const showPrevious = timeframe === 'last3' || timeframe === 'last4';
@@ -122,12 +131,12 @@ export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover,
   });
   const maxValue = Math.max(...allValues);
   
-  const chartHeight = 300; // Original chart height
-  const chartWidth = 900; // Original chart width
-  const leftMargin = 60; // Original left margin
+  const chartHeight = 250; // Reduced chart height for Results Table
+  const chartWidth = 800; // Extended chart width for Results Table
+  const leftMargin = 80; // Increased left margin for Results Table
   const barsPerDataset = 3; // Always allocate space for 3 bars (all datasets) regardless of selection
-  const pointSpacing = baseData.length > 1 ? (chartWidth - 200) / (baseData.length - 1) : 100; // Original spacing calculation
-  const barWidth = Math.max(8, pointSpacing / 5); // Original bar width
+  const pointSpacing = baseData.length > 1 ? (chartWidth - 200) / (baseData.length - 1) : 100; // Simple spacing calculation
+  const barWidth = Math.max(6, pointSpacing / 8); // Reduced bar width for Results Table
 
   // Get bar color based on actual biomarker value, not percentage change
   const getBarColor = (biomarker: string, date: string, item: BarChartData) => {
@@ -183,7 +192,7 @@ export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover,
           position: 'relative', 
           width: chartWidth + 'px', 
           height: chartHeight + 'px',
-          margin: `20px auto 30px ${leftMargin}px`, // Reduced bottom margin to decrease space below labels
+          margin: `20px auto 30px ${leftMargin}px`,
           overflow: 'visible'
         }}
         onMouseMove={(e) => {
@@ -217,7 +226,7 @@ export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover,
           position: 'absolute',
           top: '50%',
           left: '0',
-          width: `${(baseData.length - 1) * pointSpacing + 20}px`, // Match line chart width
+          width: `${(baseData.length - 1) * pointSpacing + 20}px`,
           height: '1px',
           backgroundColor: 'var(--color-border-medium)',
           zIndex: 1
@@ -252,7 +261,7 @@ export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover,
         
         {/* Bars */}
         {baseData.map((item, index) => {
-          const baseX = index * pointSpacing; // Original positioning
+          const baseX = 10 + (index * pointSpacing); // Close to x-axis start for Results Table
           
           return (
             <div key={index}>
@@ -260,7 +269,7 @@ export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover,
               {showEarliest && (
                 <>
                   {(() => {
-                    const currentX = baseX + (0 * (barWidth + 2)); // Original position 0
+                    const currentX = baseX - barWidth - 2; // Earliest bar: left offset
                     
                     // Only render bar if data exists
                     if (item.earliest !== null) {
@@ -314,7 +323,7 @@ export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover,
               {showPrevious && (
                 <>
                   {(() => {
-                    const currentX = baseX + (1 * (barWidth + 2)); // Original position 1
+                    const currentX = baseX; // Previous bar: center position
                     
                     // Only render bar if data exists
                     if (item.previous !== null) {
@@ -368,7 +377,7 @@ export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover,
               {showMostRecent && (
                 <>
                   {(() => {
-                    const currentX = baseX + (2 * (barWidth + 2)); // Original position 2
+                    const currentX = baseX + barWidth + 2; // Most recent bar: right offset
                     
                     // Only render bar if data exists
                     if (item.mostRecent !== null) {
@@ -446,9 +455,9 @@ export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover,
               key={`label-${index}`}
               style={{
                 position: 'absolute',
-                left: (index * pointSpacing - 35) + 'px', // Match line chart positioning
+                left: (10 + index * pointSpacing - 35) + 'px',
                 top: chartHeight + 8 + 'px',
-                width: '60px', // Match line chart width
+                width: '60px',
                 textAlign: 'center',
                 fontSize: '9px',
                 fontWeight: '600',

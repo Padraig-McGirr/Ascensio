@@ -4,9 +4,7 @@ import {
   Calendar,
   UserCheck,
   Clock,
-  CreditCard,
   MessageSquare,
-  FileText,
   Settings
 } from 'lucide-react';
 
@@ -27,9 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, currentPage, onNavigate 
     { icon: Calendar, label: 'Results Table', page: 'appointments' },
     { icon: UserCheck, label: 'My Patients', page: 'patients' },
     { icon: Clock, label: 'Schedule Timings', page: 'schedule' },
-    { icon: CreditCard, label: 'Payments', page: 'payments' },
     { icon: MessageSquare, label: 'Message', page: 'messages' },
-    { icon: FileText, label: 'Blog', page: 'blog' },
     { icon: Settings, label: 'Settings', page: 'settings' },
   ];
 

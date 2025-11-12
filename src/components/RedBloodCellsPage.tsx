@@ -160,7 +160,7 @@ interface RangeVisualizationProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const RangeVisualization: React.FC<RangeVisualizationProps> = ({ onHover, hoveredCell }) => {
+const RangeVisualization: React.FC<RangeVisualizationProps> = ({ onHover, hoveredCell: _hoveredCell }) => {
   const [selectedDate, setSelectedDate] = useState<string>('03/11/2025');
   
   const availableDates = ['8/28/2023', '2/28/2024', '8/30/2024', '03/11/2025'];
@@ -310,7 +310,7 @@ interface RedBloodCellsLineChartProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const RedBloodCellsLineChart: React.FC<RedBloodCellsLineChartProps> = ({ onHover, hoveredCell }) => {
+const RedBloodCellsLineChart: React.FC<RedBloodCellsLineChartProps> = ({ onHover, hoveredCell: _hoveredCell }) => {
   const [selectedBiomarkers, setSelectedBiomarkers] = useState<string[]>(['RBC (X10*12)', 'HAEMOGLOBIN (g/dl)']);
   
   const data = parseCSVData();
@@ -709,7 +709,7 @@ interface RedBloodCellsTableProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover, hoveredCell }) => {
+const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover: _onHover, hoveredCell: _hoveredCell }) => {
   // Filter data for red blood cells only
   const redBloodCellsData = [
     { biomarker: 'RBC (X10*12)', baseline: '4.31', feb2024: '4.04', aug2024: '4.39', mar2025: '4.49', febChange: '-6%', augChange: '9%', marChange: '2%' },
@@ -870,7 +870,7 @@ const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover, hovere
                 {row.baseline}
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'feb' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'feb' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
@@ -899,7 +899,7 @@ const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover, hovere
                 </span>
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'aug' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'aug' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
@@ -928,7 +928,7 @@ const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover, hovere
                 </span>
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'mar' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'mar' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',

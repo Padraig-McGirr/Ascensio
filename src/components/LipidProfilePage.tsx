@@ -158,7 +158,7 @@ interface RangeVisualizationProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const RangeVisualization: React.FC<RangeVisualizationProps> = ({ onHover, hoveredCell }) => {
+const RangeVisualization: React.FC<RangeVisualizationProps> = ({ onHover, hoveredCell: _hoveredCell }) => {
   const [selectedDate, setSelectedDate] = useState<string>('03/11/2025');
   
   const availableDates = ['8/28/2023', '2/28/2024', '8/30/2024', '03/11/2025'];
@@ -308,7 +308,7 @@ interface LipidProfileLineChartProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const LipidProfileLineChart: React.FC<LipidProfileLineChartProps> = ({ onHover, hoveredCell }) => {
+const LipidProfileLineChart: React.FC<LipidProfileLineChartProps> = ({ onHover, hoveredCell: _hoveredCell }) => {
   const [selectedBiomarkers, setSelectedBiomarkers] = useState<string[]>(['CHOLESTEROL (TOTAL)mmol/L', 'CHOLESTEROL HDL (mmol / L)']);
   
   const data = parseCSVData();
@@ -707,7 +707,7 @@ interface LipidProfileTableProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredCell }) => {
+const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover: _onHover, hoveredCell: _hoveredCell }) => {
   // Filter data for lipid profile only
   const lipidProfileData = [
     { biomarker: 'CHOLESTEROL (TOTAL)mmol/L', baseline: '3.9', feb2024: '3.3', aug2024: '4.6', mar2025: '4.6', febChange: '-15%', augChange: '39%', marChange: '0%' },
@@ -867,7 +867,7 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
                 {row.baseline}
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'feb' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'feb' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
@@ -896,7 +896,7 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
                 </span>
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'aug' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'aug' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
@@ -925,7 +925,7 @@ const LipidProfileTable: React.FC<LipidProfileTableProps> = ({ onHover, hoveredC
                 </span>
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'mar' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'mar' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',

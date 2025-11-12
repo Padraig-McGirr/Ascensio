@@ -35,12 +35,12 @@ interface ResultsTableBarChartProps {
 
 export const ResultsTableBarChart: React.FC<ResultsTableBarChartProps> = ({ 
   onHover, 
-  hoveredCell, 
+  hoveredCell: _hoveredCell, 
   chartHover, 
   onChartHover, 
   timeframe = 'last2', 
   selectedBiomarkerGroups,
-  selectedTimeRange 
+  selectedTimeRange: _selectedTimeRange 
 }) => {
   // Determine which bars to show based on timeframe
   const showMostRecent = timeframe === 'last2' || timeframe === 'last3' || timeframe === 'last4';
@@ -134,7 +134,7 @@ export const ResultsTableBarChart: React.FC<ResultsTableBarChartProps> = ({
   const chartHeight = 250; // Reduced chart height for Results Table
   const chartWidth = 800; // Extended chart width for Results Table
   const leftMargin = 80; // Increased left margin for Results Table
-  const barsPerDataset = 3; // Always allocate space for 3 bars (all datasets) regardless of selection
+  // const barsPerDataset = 3; // Always allocate space for 3 bars (all datasets) regardless of selection
   const pointSpacing = baseData.length > 1 ? (chartWidth - 200) / (baseData.length - 1) : 100; // Simple spacing calculation
   const barWidth = Math.max(6, pointSpacing / 8); // Reduced bar width for Results Table
 

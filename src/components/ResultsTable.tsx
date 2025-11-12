@@ -65,14 +65,14 @@ export const ResultsTable: React.FC = () => {
     { biomarker: 'PSA', baseline: '#N/A', feb2024: '#N/A', aug2024: '#N/A', mar2025: '#N/A', febChange: '#N/A', augChange: '#N/A', marChange: '#N/A' }
   ];
 
-  const getPercentageColor = (value: string) => {
-    if (value === '#N/A') return 'transparent';
-    const numValue = Math.abs(parseFloat(value.replace('%', '')));
-    if (numValue > 100) return '#dc2626'; // Red
-    if (numValue > 75) return '#7c3aed'; // Purple  
-    if (numValue > 25) return '#059669'; // Green
-    return '#eab308'; // Yellow
-  };
+  // const getPercentageColor = (value: string) => {
+  //   if (value === '#N/A') return 'transparent';
+  //   const numValue = Math.abs(parseFloat(value.replace('%', '')));
+  //   if (numValue > 100) return '#dc2626'; // Red
+  //   if (numValue > 75) return '#7c3aed'; // Purple  
+  //   if (numValue > 25) return '#059669'; // Green
+  //   return '#eab308'; // Yellow
+  // };
 
   // Helper function to extract biomarker name for color matching
   const getBiomarkerKey = (fullName: string): string => {

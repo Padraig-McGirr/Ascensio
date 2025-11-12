@@ -32,7 +32,7 @@ interface PercentageBarChartProps {
   selectedBiomarkerGroups?: Set<string>;
 }
 
-export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover, hoveredCell, chartHover, onChartHover, timeframe = 'last2', selectedBiomarkerGroups }) => {
+export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover, hoveredCell: _hoveredCell, chartHover, onChartHover, timeframe = 'last2', selectedBiomarkerGroups }) => {
   // Determine which bars to show based on timeframe
   const showMostRecent = timeframe === 'last2' || timeframe === 'last3' || timeframe === 'last4';
   const showPrevious = timeframe === 'last3' || timeframe === 'last4';
@@ -125,7 +125,7 @@ export const PercentageBarChart: React.FC<PercentageBarChartProps> = ({ onHover,
   const chartHeight = 300; // Original chart height
   const chartWidth = 900; // Original chart width
   const leftMargin = 60; // Original left margin
-  const barsPerDataset = 3; // Always allocate space for 3 bars (all datasets) regardless of selection
+  // const barsPerDataset = 3; // Always allocate space for 3 bars (all datasets) regardless of selection
   const pointSpacing = baseData.length > 1 ? (chartWidth - 200) / (baseData.length - 1) : 100; // Original spacing calculation
   const barWidth = Math.max(8, pointSpacing / 5); // Original bar width
 

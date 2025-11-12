@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, Heart, Shield } from 'lucide-react';
+// import { Activity, Heart, Shield } from 'lucide-react';
 
 interface LoginFormProps {
   onLogin: (username: string, password: string) => Promise<boolean>;
@@ -9,7 +9,7 @@ interface LoginFormProps {
 export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, isLoading }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  // const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,7 +50,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, isLoading }) => {
             objectPosition: 'center',
             display: 'block'
           }}
-          onError={(e) => {
+          onError={(_e) => {
             console.log('Image failed to load');
           }}
           onLoad={() => {

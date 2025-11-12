@@ -162,7 +162,7 @@ interface RangeVisualizationProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const RangeVisualization: React.FC<RangeVisualizationProps> = ({ onHover, hoveredCell }) => {
+const RangeVisualization: React.FC<RangeVisualizationProps> = ({ onHover, hoveredCell: _hoveredCell }) => {
   const [selectedDate, setSelectedDate] = useState<string>('03/11/2025');
   
   const availableDates = ['8/28/2023', '2/28/2024', '8/30/2024', '03/11/2025'];
@@ -312,7 +312,7 @@ interface WhiteBloodCellsLineChartProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const WhiteBloodCellsLineChart: React.FC<WhiteBloodCellsLineChartProps> = ({ onHover, hoveredCell }) => {
+const WhiteBloodCellsLineChart: React.FC<WhiteBloodCellsLineChartProps> = ({ onHover, hoveredCell: _hoveredCell }) => {
   const [selectedBiomarkers, setSelectedBiomarkers] = useState<string[]>(['LEUCOCYTES (X10*9)', 'PLATELETS (X10*9)']);
   
   const data = parseCSVData();
@@ -712,7 +712,7 @@ interface WhiteBloodCellsTableProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const WhiteBloodCellsTable: React.FC<WhiteBloodCellsTableProps> = ({ onHover, hoveredCell }) => {
+const WhiteBloodCellsTable: React.FC<WhiteBloodCellsTableProps> = ({ onHover: _onHover, hoveredCell: _hoveredCell }) => {
   // Filter data for white blood cells and platelets only
   const whiteBloodCellsData = [
     { biomarker: 'LEUCOCYTES (X10*9)', baseline: '4.5', feb2024: '5.1', aug2024: '5.7', mar2025: '4.4', febChange: '13%', augChange: '12%', marChange: '-23%' },
@@ -874,7 +874,7 @@ const WhiteBloodCellsTable: React.FC<WhiteBloodCellsTableProps> = ({ onHover, ho
                 {row.baseline}
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'feb' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'feb' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
@@ -903,7 +903,7 @@ const WhiteBloodCellsTable: React.FC<WhiteBloodCellsTableProps> = ({ onHover, ho
                 </span>
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'aug' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'aug' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
@@ -932,7 +932,7 @@ const WhiteBloodCellsTable: React.FC<WhiteBloodCellsTableProps> = ({ onHover, ho
                 </span>
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'mar' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'mar' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',

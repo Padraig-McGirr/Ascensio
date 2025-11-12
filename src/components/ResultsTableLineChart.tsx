@@ -25,12 +25,12 @@ interface ResultsTableLineChartProps {
 
 export const ResultsTableLineChart: React.FC<ResultsTableLineChartProps> = ({ 
   onHover, 
-  hoveredCell, 
+  hoveredCell: _hoveredCell, 
   chartHover, 
   onChartHover, 
   timeframe = 'last2', 
   selectedBiomarkerGroups,
-  selectedTimeRange 
+  selectedTimeRange: _selectedTimeRange 
 }) => {
   const [selectedLines, setSelectedLines] = useState<string[]>(['Feb to Aug 2024', 'Aug 2024 to Mar 2025']);
   
@@ -51,7 +51,7 @@ export const ResultsTableLineChart: React.FC<ResultsTableLineChartProps> = ({
   });
 
   // All available dates - 4 measurement periods (baseline + 3 follow-ups)
-  const allDates = ['8/28/2023', '2/28/2024', '8/30/2024', '03/11/2025'];
+  // const allDates = ['8/28/2023', '2/28/2024', '8/30/2024', '03/11/2025'];
   const dateColors = ['#8b5cf6', '#2563eb', '#059669', '#dc2626']; // Purple, Blue, Green, Red
   
   // Get comparison periods based on timeframe
@@ -127,13 +127,13 @@ export const ResultsTableLineChart: React.FC<ResultsTableLineChartProps> = ({
     setSelectedLines(comparisonPeriods.map(period => period.name));
   }, [timeframe]);
   
-  const toggleLine = (periodName: string) => {
-    setSelectedLines(prev => 
-      prev.includes(periodName) 
-        ? prev.filter(d => d !== periodName)
-        : [...prev, periodName]
-    );
-  };
+  // const toggleLine = (periodName: string) => {
+  //   setSelectedLines(prev => 
+  //     prev.includes(periodName) 
+  //       ? prev.filter(d => d !== periodName)
+  //       : [...prev, periodName]
+  //   );
+  // };
   
   const data: LineChartData[] = [
     { biomarker: 'LEUCOCYTES', changes: { '2/28/2024': 13, '8/30/2024': 12, '03/11/2025': -23 } },

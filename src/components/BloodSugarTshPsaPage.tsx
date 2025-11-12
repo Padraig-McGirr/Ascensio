@@ -156,7 +156,7 @@ interface RangeVisualizationProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const RangeVisualization: React.FC<RangeVisualizationProps> = ({ onHover, hoveredCell }) => {
+const RangeVisualization: React.FC<RangeVisualizationProps> = ({ onHover, hoveredCell: _hoveredCell }) => {
   const [selectedDate, setSelectedDate] = useState<string>('03/11/2025');
   
   const availableDates = ['8/28/2023', '2/28/2024', '8/30/2024', '03/11/2025'];
@@ -323,7 +323,7 @@ interface BloodSugarTshPsaLineChartProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const BloodSugarTshPsaLineChart: React.FC<BloodSugarTshPsaLineChartProps> = ({ onHover, hoveredCell }) => {
+const BloodSugarTshPsaLineChart: React.FC<BloodSugarTshPsaLineChartProps> = ({ onHover, hoveredCell: _hoveredCell }) => {
   const [selectedBiomarkers, setSelectedBiomarkers] = useState<string[]>(['TSH']);
   
   const data = parseCSVData();
@@ -619,7 +619,7 @@ interface BloodSugarTshPsaTableProps {
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const BloodSugarTshPsaTable: React.FC<BloodSugarTshPsaTableProps> = ({ onHover, hoveredCell }) => {
+const BloodSugarTshPsaTable: React.FC<BloodSugarTshPsaTableProps> = ({ onHover: _onHover, hoveredCell: _hoveredCell }) => {
   // Data for Blood Sugar + TSH + PSA
   const bloodSugarTshPsaData = [
     { biomarker: 'GLUCOSE MMOL/L', baseline: '#N/A', feb2024: '#N/A', aug2024: '#N/A', mar2025: '#N/A', febChange: '#N/A', augChange: '#N/A', marChange: '#N/A' },
@@ -779,7 +779,7 @@ const BloodSugarTshPsaTable: React.FC<BloodSugarTshPsaTableProps> = ({ onHover, 
                 {row.baseline}
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'feb' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'feb' 
                   ? '#fbbf24' : row.feb2024 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
@@ -809,7 +809,7 @@ const BloodSugarTshPsaTable: React.FC<BloodSugarTshPsaTableProps> = ({ onHover, 
                 </span>
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'aug' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'aug' 
                   ? '#fbbf24' : row.aug2024 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
@@ -839,7 +839,7 @@ const BloodSugarTshPsaTable: React.FC<BloodSugarTshPsaTableProps> = ({ onHover, 
                 </span>
               </td>
               <td style={{ 
-                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'mar' 
+                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'mar' 
                   ? '#fbbf24' : row.mar2025 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',

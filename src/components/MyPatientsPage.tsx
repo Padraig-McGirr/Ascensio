@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, Calendar, Phone, Mail, MapPin, Eye, FileText, AlertCircle, Clock, Users } from 'lucide-react';
+import { Search, Filter, Calendar, Phone, Mail, Eye, FileText, AlertCircle, Clock, Users } from 'lucide-react';
+// MapPin not used
 import { mockPatients } from '../data/mockData';
-import type { Patient } from '../types';
+// import type { Patient } from '../types'; // Unused type import
 
 export const MyPatientsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');

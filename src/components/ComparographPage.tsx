@@ -274,7 +274,7 @@ export const ComparographPage: React.FC<ComparographPageProps> = ({ onNavigate }
           })}
 
           {/* Data lines and points */}
-          {chartData.map((item, itemIndex) => {
+          {chartData.map((item, _itemIndex) => {
             const pathData = item.data.map((point, pointIndex) => {
               const dateIndex = allDates.indexOf(point.date);
               const x = getX(dateIndex);

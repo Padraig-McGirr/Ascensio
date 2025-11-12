@@ -1,6 +1,6 @@
 import { 
   linearRegression, 
-  linearRegressionLine, 
+  // linearRegressionLine, 
   sampleCorrelation, 
   standardDeviation,
   mean,
@@ -8,7 +8,7 @@ import {
   quantile
 } from 'simple-statistics';
 import { differenceInDays, parseISO } from 'date-fns';
-import { LongitudinalDataPoint, BloodBiomarker } from '../types/bloodTest';
+import type { LongitudinalDataPoint, BloodBiomarker } from '../types/bloodTest';
 
 export class BloodTestAnalyticsEngine {
   
@@ -39,7 +39,6 @@ export class BloodTestAnalyticsEngine {
 
     // Calculate linear regression
     const regression = linearRegression(coordinates);
-    const line = linearRegressionLine(regression);
     
     // Calculate correlation coefficient
     const xValues = coordinates.map(coord => coord[0]);

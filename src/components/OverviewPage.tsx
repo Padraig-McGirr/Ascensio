@@ -124,19 +124,19 @@ biomarkers: [
   };
 
   // Function to determine background color based on percentage change
-  const getPercentageChangeColor = (changeValue: number | null): string => {
-    if (changeValue === null) return '#6b7280'; // Gray for null values
-    const absValue = Math.abs(changeValue);
-    if (absValue > 100) {
-      return '#dc2626'; // Red solid
-    } else if (absValue > 75) {
-      return '#7c3aed'; // Purple solid
-    } else if (absValue > 25) {
-      return '#059669'; // Green solid
-    } else {
-      return '#fbbf24'; // Yellow solid
-    }
-  };
+  // const getPercentageChangeColor = (changeValue: number | null): string => {
+  //   if (changeValue === null) return '#6b7280'; // Gray for null values
+  //   const absValue = Math.abs(changeValue);
+  //   if (absValue > 100) {
+  //     return '#dc2626'; // Red solid
+  //   } else if (absValue > 75) {
+  //     return '#7c3aed'; // Purple solid
+  //   } else if (absValue > 25) {
+  //     return '#059669'; // Green solid
+  //   } else {
+  //     return '#fbbf24'; // Yellow solid
+  //   }
+  // };
 
   // Helper function to extract biomarker key for color matching
   const getBiomarkerKey = (fullName: string): string => {

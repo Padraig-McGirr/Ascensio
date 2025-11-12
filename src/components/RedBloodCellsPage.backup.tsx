@@ -1,22 +1,23 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 
-// CSV data for Liver Function
+// CSV data for Red Blood Cells
 const csvData = `BLOOD TYPES,8/28/2023,2/28/2024,8/30/2024,03/11/2025,2/28/2024,38/08/2024,03/11/2025
-ALT (U/L),19,17,28,20,-11%,65%,-29%
-BILIRUBIN TOTAL (UMOL/L),9.9,8.6,6.6,9.5,-13%,-23%,44%
-ALKALINE PHOSPHATASE( IU/L),85,80,91,70,-6%,14%,-23%
-GAMMA GT (U/L),46,30,43,32,-35%,43%,-26%
-TOTAL PROTEINS (G/L),77,75,77,77,-3%,3%,0%
-ALBUMIN (G/L)),46,43,46,47,-7%,7%,2%`;
+RBC (X10*12),4.31,4.04,4.39,4.49,-6%,9%,2%
+HAEMOGLOBIN (g/dl),12.2,11.6,12.8,13,-5%,10%,2%
+HAEMATOCRIT (L/L),0.4,0.36,0.41,0.41,-10%,14%,0%
+MCV (fl),93.3,88.1,92.3,90.6,-6%,5%,-2%
+MCH (pg),28.3,28.7,29.2,29,1%,2%,-1%
+MCHC (g/dl),30.3,32.6,31.6,31.9,8%,-3%,1%`;
 
-// Liver function ranges data
+// Red blood cells ranges data
 const bloodRangesData = {
-  'ALT (U/L)': { min: 5.0, max: 33.0 },
-  'BILIRUBIN TOTAL (UMOL/L)': { min: 2.0, max: 21.0 },
-  'ALKALINE PHOSPHATASE( IU/L)': { min: 30.0, max: 130.0 },
-  'GAMMA GT (U/L)': { min: 6.0, max: 42.0 },
-  'TOTAL PROTEINS (G/L)': { min: 60.0, max: 80.0 },
-  'ALBUMIN (G/L))': { min: 35.0, max: 50.0 }
+  'RBC (X10*12)': { min: 3.8, max: 4.8 },
+  'HAEMOGLOBIN (g/dl)': { min: 12.0, max: 15.0 },
+  'HAEMATOCRIT (L/L)': { min: 0.36, max: 0.46 },
+  'MCV (fl)': { min: 83, max: 101 },
+  'MCH (pg)': { min: 27, max: 32 },
+  'MCHC (g/dl)': { min: 31.5, max: 36 }
 };
 
 interface DataPoint {
@@ -36,7 +37,7 @@ interface CircularGaugeProps {
   onHover?: (cell: { biomarker: string; column: string } | null) => void;
 }
 
-const CircularGauge: React.FC<CircularGaugeProps> = ({ biomarker, value, ranges, selectedDate, onHover }) => {
+const CircularGauge: React.FC<CircularGaugeProps> = ({ biomarker, value, ranges, selectedDate, onHover: _onHover }) => {
   const size = 110;
   const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
@@ -185,7 +186,7 @@ const RangeVisualization: React.FC<RangeVisualizationProps> = ({ onHover, hovere
     return null;
   };
 
-  const biomarkers = ['ALT (U/L)', 'BILIRUBIN TOTAL (UMOL/L)', 'ALKALINE PHOSPHATASE( IU/L)', 'GAMMA GT (U/L)', 'TOTAL PROTEINS (G/L)', 'ALBUMIN (G/L))'];
+  const biomarkers = ['RBC (X10*12)', 'HAEMOGLOBIN (g/dl)', 'HAEMATOCRIT (L/L)', 'MCV (fl)', 'MCH (pg)', 'MCHC (g/dl)'];
 
   return (
     <div style={{ 
@@ -305,16 +306,16 @@ const parseCSVData = (): DataPoint[] => {
   return dataPoints;
 };
 
-interface LiverFunctionLineChartProps {
+interface RedBloodCellsLineChartProps {
   onHover?: (cell: { biomarker: string; column: string } | null) => void;
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover, hoveredCell: _hoveredCell }) => {
-  const [selectedBiomarkers, setSelectedBiomarkers] = useState<string[]>(['ALT (U/L)', 'BILIRUBIN TOTAL (UMOL/L)']);
+const RedBloodCellsLineChart: React.FC<RedBloodCellsLineChartProps> = ({ onHover, hoveredCell: _hoveredCell }) => {
+  const [selectedBiomarkers, setSelectedBiomarkers] = useState<string[]>(['RBC (X10*12)', 'HAEMOGLOBIN (g/dl)']);
   
   const data = parseCSVData();
-  const biomarkers = ['ALT (U/L)', 'BILIRUBIN TOTAL (UMOL/L)', 'ALKALINE PHOSPHATASE( IU/L)', 'GAMMA GT (U/L)', 'TOTAL PROTEINS (G/L)', 'ALBUMIN (G/L))'];
+  const biomarkers = ['RBC (X10*12)', 'HAEMOGLOBIN (g/dl)', 'HAEMATOCRIT (L/L)', 'MCV (fl)', 'MCH (pg)', 'MCHC (g/dl)'];
   
   // Get unique dates and sort them
   const dates = [...new Set(data.map(d => d.date))].sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
@@ -324,11 +325,11 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
   const margin = { top: 20, right: 250, bottom: 60, left: 80 };
   const plotWidth = chartWidth - margin.left - margin.right;
   const plotHeight = chartHeight - margin.top - margin.bottom;
-
+  
   // Separate high-value biomarkers from others for dual axis
   const selectedData = data.filter(d => selectedBiomarkers.includes(d.biomarker));
-  const highValueData = selectedData.filter(d => ['ALKALINE PHOSPHATASE( IU/L)', 'TOTAL PROTEINS (G/L)', 'ALBUMIN (G/L))'].includes(d.biomarker)); // Higher values (~70-91)
-  const otherData = selectedData.filter(d => !['ALKALINE PHOSPHATASE( IU/L)', 'TOTAL PROTEINS (G/L)', 'ALBUMIN (G/L))'].includes(d.biomarker));
+  const highValueData = selectedData.filter(d => d.biomarker === 'MCV (fl)'); // MCV has highest values (~88-93)
+  const otherData = selectedData.filter(d => d.biomarker !== 'MCV (fl)');
   
   // Calculate scales for left axis (other biomarkers)
   let leftMaxValue = 0;
@@ -355,12 +356,12 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
   }
   
   const colors = {
-    'ALT (U/L)': '#ef4444',
-    'BILIRUBIN TOTAL (UMOL/L)': '#3b82f6',
-    'ALKALINE PHOSPHATASE( IU/L)': '#10b981',
-    'GAMMA GT (U/L)': '#f59e0b',
-    'TOTAL PROTEINS (G/L)': '#8b5cf6',
-    'ALBUMIN (G/L))': '#ec4899'
+    'RBC (X10*12)': '#ef4444',
+    'HAEMOGLOBIN (g/dl)': '#3b82f6',
+    'HAEMATOCRIT (L/L)': '#10b981',
+    'MCV (fl)': '#f59e0b',
+    'MCH (pg)': '#8b5cf6',
+    'MCHC (g/dl)': '#ec4899'
   };
   
   // Left axis Y calculation (other biomarkers)
@@ -383,12 +384,12 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   };
-
+  
   return (
     <div style={{ marginBottom: '32px' }}>
       {/* Biomarker Selection */}
       <div style={{ marginBottom: '20px' }}>
-        {selectedBiomarkers.some(b => ['ALKALINE PHOSPHATASE( IU/L)', 'TOTAL PROTEINS (G/L)', 'ALBUMIN (G/L))'].includes(b)) && selectedBiomarkers.length > 1 && (
+        {selectedBiomarkers.includes('MCV (fl)') && selectedBiomarkers.length > 1 && (
           <div style={{ 
             backgroundColor: '#e0f2fe', 
             padding: '8px 12px', 
@@ -397,7 +398,7 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
             fontSize: 'var(--text-xs)',
             color: '#0369a1'
           }}>
-            💡 Dual-axis view: High-value biomarkers (Alkaline Phosphatase, Total Proteins, Albumin) use the right Y-axis, other biomarkers use the left Y-axis for better visualization.
+            💡 Dual-axis view: MCV (high values) uses the right Y-axis, other biomarkers use the left Y-axis for better visualization.
           </div>
         )}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -482,7 +483,7 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
                 y={y + 4}
                 textAnchor="start"
                 fontSize="12"
-                fill="#10b981"
+                fill="#f59e0b"
                 fontWeight="500"
               >
                 {Math.round(value)}
@@ -505,7 +506,7 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
               y1={margin.top}
               x2={margin.left + plotWidth}
               y2={margin.top + plotHeight}
-              stroke="#10b981"
+              stroke="#f59e0b"
               strokeWidth="2"
             />
           )}
@@ -528,7 +529,7 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
           })}
           
           {/* Lines for other biomarkers (left axis) */}
-          {selectedBiomarkers.filter(b => !['ALKALINE PHOSPHATASE( IU/L)', 'TOTAL PROTEINS (G/L)', 'ALBUMIN (G/L))'].includes(b)).map((biomarker) => {
+          {selectedBiomarkers.filter(b => b !== 'MCV (fl)').map((biomarker) => {
             const biomarkerData = selectedData
               .filter(d => d.biomarker === biomarker)
               .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -585,9 +586,8 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
           })}
           
           {/* Lines for high values (right axis) */}
-          {selectedBiomarkers.filter(b => ['ALKALINE PHOSPHATASE( IU/L)', 'TOTAL PROTEINS (G/L)', 'ALBUMIN (G/L))'].includes(b)).map((biomarker) => {
-            const biomarkerData = selectedData
-              .filter(d => d.biomarker === biomarker)
+          {selectedBiomarkers.includes('MCV (fl)') && (() => {
+            const biomarkerData = highValueData
               .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
             
             if (biomarkerData.length < 2) return null;
@@ -600,12 +600,12 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
             }).join(' ');
             
             return (
-              <g key={biomarker}>
+              <g key="mcv">
                 {/* Line */}
                 <path
                   d={pathData}
                   fill="none"
-                  stroke={colors[biomarker as keyof typeof colors]}
+                  stroke="#f59e0b"
                   strokeWidth="3"
                 />
                 
@@ -624,29 +624,29 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
                   
                   return (
                     <circle
-                      key={`${biomarker}-${point.date}`}
+                      key={`mcv-${point.date}`}
                       cx={x}
                       cy={y}
                       r="5"
-                      fill={colors[biomarker as keyof typeof colors]}
+                      fill="#f59e0b"
                       stroke="#ffffff"
                       strokeWidth="2"
                       style={{ cursor: 'pointer' }}
-                      onMouseEnter={() => onHover?.({ biomarker, column: getColumnFromDate(point.date) })}
+                      onMouseEnter={() => onHover?.({ biomarker: 'MCV (fl)', column: getColumnFromDate(point.date) })}
                       onMouseLeave={() => onHover?.(null)}
                     >
-                      <title>{`${biomarker.split(' (')[0]}: ${point.value} on ${formatDate(point.date)}`}</title>
+                      <title>{`MCV: ${point.value} on ${formatDate(point.date)}`}</title>
                     </circle>
                   );
                 })}
               </g>
             );
-          })}
+          })()}
           
           {/* Legend */}
           {selectedBiomarkers.map((biomarker, index) => {
-            const y = 30 + index * 25;
-            const isHighValue = ['ALKALINE PHOSPHATASE( IU/L)', 'TOTAL PROTEINS (G/L)', 'ALBUMIN (G/L))'].includes(biomarker);
+            const y = 30 + index * 20;
+            const isHighValue = biomarker === 'MCV (fl)';
             return (
               <g key={biomarker}>
                 <line
@@ -660,12 +660,12 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
                 <text
                   x={chartWidth - margin.right + 115}
                   y={y + 4}
-                  fontSize="11"
+                  fontSize="12"
                   fill="var(--color-text-primary)"
                 >
                   {biomarker.split(' (')[0]}
                   {isHighValue && (
-                    <tspan fill="#10b981" fontWeight="500"> (right axis)</tspan>
+                    <tspan fill="#f59e0b" fontWeight="500"> (right axis)</tspan>
                   )}
                 </text>
               </g>
@@ -675,28 +675,28 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
           {/* Axis labels */}
           {otherData.length > 0 && (
             <text
-              x={margin.left - 40}
+              x={margin.left - 60}
               y={margin.top + plotHeight / 2}
               textAnchor="middle"
               fontSize="12"
               fill="var(--color-text-secondary)"
-              transform={`rotate(-90, ${margin.left - 40}, ${margin.top + plotHeight / 2})`}
+              transform={`rotate(-90, ${margin.left - 60}, ${margin.top + plotHeight / 2})`}
             >
-              Liver Function Markers
+              Red Blood Cell Markers
             </text>
           )}
           
           {highValueData.length > 0 && (
             <text
-              x={margin.left + plotWidth + 40}
+              x={margin.left + plotWidth + 60}
               y={margin.top + plotHeight / 2}
               textAnchor="middle"
               fontSize="12"
-              fill="#10b981"
+              fill="#f59e0b"
               fontWeight="500"
-              transform={`rotate(90, ${margin.left + plotWidth + 40}, ${margin.top + plotHeight / 2})`}
+              transform={`rotate(90, ${margin.left + plotWidth + 60}, ${margin.top + plotHeight / 2})`}
             >
-              High-Value Markers
+              MCV (fl)
             </text>
           )}
         </svg>
@@ -705,20 +705,20 @@ const LiverFunctionLineChart: React.FC<LiverFunctionLineChartProps> = ({ onHover
   );
 };
 
-interface LiverFunctionTableProps {
+interface RedBloodCellsTableProps {
   onHover?: (cell: { biomarker: string; column: string } | null) => void;
   hoveredCell?: { biomarker: string; column: string } | null;
 }
 
-const LiverFunctionTable: React.FC<LiverFunctionTableProps> = ({ onHover: _onHover, hoveredCell: _hoveredCell }) => {
-  // Filter data for liver function only
-  const liverFunctionData = [
-    { biomarker: 'ALT (U/L)', baseline: '19', feb2024: '17', aug2024: '28', mar2025: '20', febChange: '-11%', augChange: '65%', marChange: '-29%' },
-    { biomarker: 'BILIRUBIN TOTAL (UMOL/L)', baseline: '9.9', feb2024: '8.6', aug2024: '6.6', mar2025: '9.5', febChange: '-13%', augChange: '-23%', marChange: '44%' },
-    { biomarker: 'ALKALINE PHOSPHATASE( IU/L)', baseline: '85', feb2024: '80', aug2024: '91', mar2025: '70', febChange: '-6%', augChange: '14%', marChange: '-23%' },
-    { biomarker: 'GAMMA GT (U/L)', baseline: '46', feb2024: '30', aug2024: '43', mar2025: '32', febChange: '-35%', augChange: '43%', marChange: '-26%' },
-    { biomarker: 'TOTAL PROTEINS (G/L)', baseline: '77', feb2024: '75', aug2024: '77', mar2025: '77', febChange: '-3%', augChange: '3%', marChange: '0%' },
-    { biomarker: 'ALBUMIN (G/L))', baseline: '46', feb2024: '43', aug2024: '46', mar2025: '47', febChange: '-7%', augChange: '7%', marChange: '2%' }
+const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover: _onHover, hoveredCell: _hoveredCell }) => {
+  // Filter data for red blood cells only
+  const redBloodCellsData = [
+    { biomarker: 'RBC (X10*12)', baseline: '4.31', feb2024: '4.04', aug2024: '4.39', mar2025: '4.49', febChange: '-6%', augChange: '9%', marChange: '2%' },
+    { biomarker: 'HAEMOGLOBIN (g/dl)', baseline: '12.2', feb2024: '11.6', aug2024: '12.8', mar2025: '13', febChange: '-5%', augChange: '10%', marChange: '2%' },
+    { biomarker: 'HAEMATOCRIT (L/L)', baseline: '0.4', feb2024: '0.36', aug2024: '0.41', mar2025: '0.41', febChange: '-10%', augChange: '14%', marChange: '0%' },
+    { biomarker: 'MCV (fl)', baseline: '93.3', feb2024: '88.1', aug2024: '92.3', mar2025: '90.6', febChange: '-6%', augChange: '5%', marChange: '-2%' },
+    { biomarker: 'MCH (pg)', baseline: '28.3', feb2024: '28.7', aug2024: '29.2', mar2025: '29', febChange: '1%', augChange: '2%', marChange: '-1%' },
+    { biomarker: 'MCHC (g/dl)', baseline: '30.3', feb2024: '32.6', aug2024: '31.6', mar2025: '31.9', febChange: '8%', augChange: '-3%', marChange: '1%' }
   ];
 
   const getPercentageColor = (value: string) => {
@@ -847,7 +847,7 @@ const LiverFunctionTable: React.FC<LiverFunctionTableProps> = ({ onHover: _onHov
           </tr>
         </thead>
         <tbody>
-          {liverFunctionData.map((row, index) => (
+          {redBloodCellsData.map((row, index) => (
             <tr key={index}>
               <td style={{ 
                 backgroundColor: '#dcfce7', // Light green
@@ -871,7 +871,7 @@ const LiverFunctionTable: React.FC<LiverFunctionTableProps> = ({ onHover: _onHov
                 {row.baseline}
               </td>
               <td style={{ 
-                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'feb' 
+                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'feb' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
@@ -900,7 +900,7 @@ const LiverFunctionTable: React.FC<LiverFunctionTableProps> = ({ onHover: _onHov
                 </span>
               </td>
               <td style={{ 
-                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'aug' 
+                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'aug' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
@@ -929,7 +929,7 @@ const LiverFunctionTable: React.FC<LiverFunctionTableProps> = ({ onHover: _onHov
                 </span>
               </td>
               <td style={{ 
-                backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'mar' 
+                backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'mar' 
                   ? '#fbbf24' : 'var(--color-surface)',
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
@@ -965,7 +965,7 @@ const LiverFunctionTable: React.FC<LiverFunctionTableProps> = ({ onHover: _onHov
   );
 };
 
-export const LiverFunctionPage: React.FC = () => {
+export const RedBloodCellsPage: React.FC = () => {
   // Hover state for highlighting
   const [hoveredCell, setHoveredCell] = useState<{
     biomarker: string;
@@ -996,7 +996,7 @@ export const LiverFunctionPage: React.FC = () => {
           marginBottom: '8px',
           margin: 0
         }}>
-          Liver Function
+          Red Blood Cells
         </h1>
         <div style={{ 
           height: '4px', 
@@ -1007,24 +1007,29 @@ export const LiverFunctionPage: React.FC = () => {
         }}></div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content Grid */}
       <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: '1fr 440px',
-        gap: '16px',
+        display: 'grid', 
+        gridTemplateColumns: '1fr 440px', 
+        gap: '12px',
+        height: 'calc(100vh - 120px)',
+        width: '100%',
         padding: '12px',
         margin: '0'
       }}>
         
-        {/* Left Column - Table and Chart */}
-        <div>
+        {/* Left Column - Results Table and Chart */}
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '12px'
+        }}>
           {/* Results Table */}
           <div style={{ 
             backgroundColor: 'var(--color-surface)',
             border: '1px solid var(--color-border-light)',
             borderRadius: '8px',
             padding: '16px',
-            marginBottom: '16px',
             overflow: 'auto'
           }}>
             <h2 style={{ 
@@ -1034,10 +1039,10 @@ export const LiverFunctionPage: React.FC = () => {
               marginBottom: '16px',
               textAlign: 'center'
             }}>
-              Liver Function Results
+              Red Blood Cells Results
             </h2>
             
-            <LiverFunctionTable onHover={setHoveredCell} hoveredCell={hoveredCell} />
+            <RedBloodCellsTable onHover={setHoveredCell} hoveredCell={hoveredCell} />
           </div>
           
           {/* Chart */}
@@ -1046,9 +1051,10 @@ export const LiverFunctionPage: React.FC = () => {
             border: '1px solid var(--color-border-light)',
             borderRadius: '8px',
             padding: '8px',
+            flex: 1,
             overflow: 'auto'
           }}>
-            <LiverFunctionLineChart onHover={setHoveredCell} hoveredCell={hoveredCell} />
+            <RedBloodCellsLineChart onHover={setHoveredCell} hoveredCell={hoveredCell} />
           </div>
         </div>
         

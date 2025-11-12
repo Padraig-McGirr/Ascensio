@@ -39,8 +39,8 @@ export const LongitudinalDataPointSchema = z.object({
 // Patient analytics profile
 export const PatientAnalyticsSchema = z.object({
   patientId: z.string(),
-  biomarkerHistory: z.record(z.array(LongitudinalDataPointSchema)),
-  trendAnalysis: z.record(z.object({
+  biomarkerHistory: z.record(z.string(), z.array(LongitudinalDataPointSchema)),
+  trendAnalysis: z.record(z.string(), z.object({
     trend: z.enum(['improving', 'worsening', 'stable', 'fluctuating']),
     slope: z.number(),
     correlation: z.number(),

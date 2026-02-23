@@ -734,14 +734,6 @@ const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover: _onHov
     { biomarker: 'MCHC (g/dl)', baseline: '30.3', feb2024: '32.6', aug2024: '31.6', mar2025: '31.9', febChange: '8%', augChange: '-3%', marChange: '1%' }
   ];
 
-  const getPercentageColor = (value: string) => {
-    if (value === '#N/A') return 'transparent';
-    const numValue = Math.abs(parseFloat(value.replace('%', '')));
-    if (numValue > 100) return '#dc2626'; // Red
-    if (numValue > 75) return '#7c3aed'; // Purple  
-    if (numValue > 25) return '#059669'; // Green
-    return '#eab308'; // Yellow
-  };
 
   return (
     <div style={{ overflow: 'auto', maxHeight: 'calc(100vh - 120px)' }}>

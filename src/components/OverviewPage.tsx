@@ -21,9 +21,13 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => {
     visible: false
   });
 
+  // State for tracking which biomarker should be highlighted in the table
+  const [highlightedBiomarker, setHighlightedBiomarker] = React.useState<string | null>(null);
+
   // Chart filter state
-  const [selectedTimeRange, setSelectedTimeRange] = React.useState<string>('last2');
-  const [selectedBiomarkerGroups, setSelectedBiomarkerGroups] = React.useState<Set<string>>(new Set(['whiteBloodCells', 'redBloodCells', 'liverFunction', 'lipidProfile', 'kidneyFunction', 'bloodSugarTshPsa']));
+  const [selectedTimeRange] = React.useState<string>('last2'); // For top chart
+  const [bottomChartTimeRange, setBottomChartTimeRange] = React.useState<string>('last2'); // For bottom chart only
+  const [selectedBiomarkerGroups] = React.useState<Set<string>>(new Set(['whiteBloodCells', 'redBloodCells', 'liverFunction', 'lipidProfile', 'kidneyFunction', 'bloodSugarTshPsa']));
 
   // Biomarker data with actual values and changes
   const biomarkerGroups = [
@@ -113,15 +117,6 @@ biomarkers: [
     setExpandedGroups(newExpanded);
   };
 
-  const toggleBiomarkerGroup = (groupId: string) => {
-    const newSelected = new Set(selectedBiomarkerGroups);
-    if (newSelected.has(groupId)) {
-      newSelected.delete(groupId);
-    } else {
-      newSelected.add(groupId);
-    }
-    setSelectedBiomarkerGroups(newSelected);
-  };
 
   // Function to determine background color based on percentage change
   // const getPercentageChangeColor = (changeValue: number | null): string => {
@@ -137,6 +132,57 @@ biomarkers: [
   //     return '#fbbf24'; // Yellow solid
   //   }
   // };
+
+  // Helper function to map chart biomarker names to table biomarker names
+  const mapChartNameToTableName = (chartName: string): string => {
+    const chartToTableMapping: Record<string, string> = {
+      // Direct matches (charts use these exact names)
+      'LEUCOCYTES': 'LEUCOCYTES',
+      'NEUTROPHILS': 'NEUTROPHILS', 
+      'LYMPHOCYTES': 'LYMPHOCYTES',
+      'MONOCYTES': 'MONOCYTES',
+      'EOSINOPHILS': 'EOSINOPHILS',
+      'BASOPHILS': 'BASOPHILS',
+      'PLATELETS': 'PLATELETS',
+      'RBC': 'RBC',
+      'HAEMOGLOBIN': 'HAEMOGLOBIN',
+      'HAEMATOCRIT': 'HAEMATOCRIT',
+      'MCV': 'MCV',
+      'MCH': 'MCH',
+      'MCHC': 'MCHC',
+      'ALT': 'ALT',
+      'UREA': 'UREA',
+      'CREATININE': 'CREATININE',
+      'eGFR': 'eGFR',
+      'TSH': 'TSH',
+      'TRIGLYCERIDES': 'TRIGLYCERIDES',
+      'ALBUMIN': 'ALBUMIN',
+      
+      // Mismatched names (charts → table normalized versions)
+      'BILIRUBIN': 'BILIRUBIN TOTAL',
+      'ALP': 'ALKALINE PHOSPHATASE',
+      'GAMMA GT': 'GAMMA GT',
+      'PROTEINS': 'TOTAL PROTEINS', 
+      'CHOLESTEROL': 'CHOLESTEROL TOTAL', // Notice: removed parentheses as they get normalized away
+      'HDL': 'CHOLESTEROL HDL',
+      'LDL': 'CHOLESTEROL LDL',
+      'NON-HDL': 'NON HDL CHOLESTEROL'
+    };
+    
+    return chartToTableMapping[chartName.toUpperCase()] || chartName.toUpperCase();
+  };
+
+  // Helper function to normalize table biomarker name for comparison
+  const normalizeTableBiomarkerName = (name: string): string => {
+    // Remove units and extra formatting from table names
+    return name.toUpperCase()
+      .replace(/\)\)+/g, ')') // Fix double closing parentheses (like ALBUMIN (G/L)))  
+      .replace(/\([^)]*\)?[^)]*/g, '') // Remove parentheses and all content inside/after, handle missing closing paren
+      .replace(/\s*[a-zA-Z]+\/[a-zA-Z0-9.]+\s*$/g, '') // Remove trailing units like "mmol/L", "Ml/min/1.73m2"  
+      .replace(/[a-zA-Z]+\/[a-zA-Z0-9.]+$/g, '') // Remove units without spaces
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+  };
 
   // Helper function to extract biomarker key for color matching
   const getBiomarkerKey = (fullName: string): string => {
@@ -204,106 +250,6 @@ biomarkers: [
           gap: '1px'
         }}>
           
-          {/* Filter Section */}
-          <div style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: '8px',
-            padding: '16px',
-            margin: '0 0 1px 0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '24px'
-          }}>
-            {/* Time Range Filters */}
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              alignItems: 'center'
-            }}>
-              {['last2', 'last3', 'last4'].map((range) => (
-                  <button 
-                    key={range}
-                    onClick={() => setSelectedTimeRange(range)}
-                    style={{
-                      padding: '8px 16px',
-                      fontSize: 'var(--text-sm)',
-                      fontWeight: '500',
-                      borderRadius: '6px',
-                      border: '1px solid var(--color-border)',
-                      backgroundColor: selectedTimeRange === range ? 'var(--color-primary)' : 'transparent',
-                      color: selectedTimeRange === range ? 'white' : 'var(--color-text-secondary)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedTimeRange !== range) {
-                        e.currentTarget.style.backgroundColor = 'var(--color-primary-50)';
-                        e.currentTarget.style.color = 'var(--color-primary)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedTimeRange !== range) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = 'var(--color-text-secondary)';
-                      }
-                    }}
-                  >
-                    Last {range.slice(-1)} tests
-                  </button>
-              ))}
-            </div>
-
-            {/* Biomarker Group Filters */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gridTemplateRows: 'repeat(2, 1fr)',
-              gap: '4px',
-              alignItems: 'center'
-            }}>
-              {[
-                { id: 'whiteBloodCells', label: 'WBC & Platelets' },
-                { id: 'redBloodCells', label: 'Red Blood Cells' },
-                { id: 'liverFunction', label: 'Liver Function' },
-                { id: 'lipidProfile', label: 'Lipid Profile' },
-                { id: 'kidneyFunction', label: 'Kidney Function' },
-                { id: 'bloodSugarTshPsa', label: 'Blood Sugar + TSH + PSA' }
-              ].map((group) => (
-                <button 
-                  key={group.id}
-                  onClick={() => toggleBiomarkerGroup(group.id)}
-                  style={{
-                    padding: '8px 16px',
-                    fontSize: '10px',
-                    fontWeight: '500',
-                    borderRadius: '6px',
-                    border: '1px solid var(--color-border)',
-                    backgroundColor: selectedBiomarkerGroups.has(group.id) ? 'var(--color-primary)' : 'transparent',
-                    color: selectedBiomarkerGroups.has(group.id) ? 'white' : 'var(--color-text-secondary)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    whiteSpace: 'nowrap'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!selectedBiomarkerGroups.has(group.id)) {
-                      e.currentTarget.style.backgroundColor = 'var(--color-primary-50)';
-                      e.currentTarget.style.color = 'var(--color-primary)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!selectedBiomarkerGroups.has(group.id)) {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = 'var(--color-text-secondary)';
-                    }
-                  }}
-                >
-                  {group.label}
-                </button>
-              ))}
-            </div>
-          </div>
           
           {/* Top Chart - Percentage Change Bar Graph */}
           <div style={{ 
@@ -330,6 +276,7 @@ biomarkers: [
               onChartHover={setChartHover}
               timeframe={selectedTimeRange}
               selectedBiomarkerGroups={selectedBiomarkerGroups}
+              onBiomarkerHover={setHighlightedBiomarker}
             />
           </div>
 
@@ -342,22 +289,63 @@ biomarkers: [
             padding: '8px',
             margin: '0'
           }}>
-            <div style={{ marginBottom: '8px' }}>
+            <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <h2 style={{ 
                 fontSize: 'var(--text-xl)', 
                 fontWeight: '600', 
                 color: 'var(--color-text-primary)',
                 marginBottom: '4px',
+                flex: '1',
                 textAlign: 'center'
               }}>
                 Percentage Change in Blood Results
               </h2>
+              
+              {/* Time Range Filters for Bottom Chart Only */}
+              <div style={{
+                display: 'flex',
+                gap: '6px',
+                alignItems: 'center'
+              }}>
+                {['last2', 'last3', 'last4'].map((range) => (
+                    <button 
+                      key={range}
+                      onClick={() => setBottomChartTimeRange(range)}
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        borderRadius: '6px',
+                        border: '1px solid var(--color-border)',
+                        backgroundColor: bottomChartTimeRange === range ? 'var(--color-primary)' : 'transparent',
+                        color: bottomChartTimeRange === range ? 'white' : 'var(--color-text-secondary)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (bottomChartTimeRange !== range) {
+                          e.currentTarget.style.backgroundColor = 'var(--color-primary-50)';
+                          e.currentTarget.style.color = 'var(--color-primary)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (bottomChartTimeRange !== range) {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = 'var(--color-text-secondary)';
+                        }
+                      }}
+                    >
+                      Last {range.slice(-1)} tests
+                    </button>
+                ))}
+              </div>
             </div>
             <PercentageLineChart 
               chartHover={chartHover}
               onChartHover={setChartHover}
-              timeframe={selectedTimeRange}
+              timeframe={bottomChartTimeRange}
               selectedBiomarkerGroups={selectedBiomarkerGroups}
+              onBiomarkerHover={setHighlightedBiomarker}
             />
           </div>
         </div>
@@ -439,7 +427,12 @@ biomarkers: [
                 </div>
 
                 {/* Biomarker Rows */}
-                {expandedGroups.has(group.id) && group.biomarkers.map((biomarker, index) => (
+                {expandedGroups.has(group.id) && group.biomarkers.map((biomarker, index) => {
+                  const normalizedTableName = normalizeTableBiomarkerName(biomarker.name);
+                  const expectedTableName = mapChartNameToTableName(highlightedBiomarker || '');
+                  const isHighlighted = highlightedBiomarker && normalizedTableName === expectedTableName;
+                  
+                  return (
                   <div 
                     key={index}
                     style={{
@@ -447,7 +440,9 @@ biomarkers: [
                       gridTemplateColumns: '2fr 1fr 1fr',
                       borderBottom: index < group.biomarkers.length - 1 ? '1px solid var(--color-border-light)' : 'none',
                       fontSize: 'var(--text-xs)',
-                      transition: 'background-color 0.2s ease'
+                      transition: 'all 0.2s ease',
+                      border: isHighlighted ? '2px solid black' : 'none',
+                      marginBottom: isHighlighted ? '2px' : '0px'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = 'var(--color-primary-25)';
@@ -479,14 +474,15 @@ biomarkers: [
                       padding: '4px 10px',
                       textAlign: 'center',
                       fontWeight: '600',
-                      backgroundColor: biomarker.name.includes('eGFR') ? '#6b7280' : (biomarker.result === '#N/A' ? '#6b7280' : (biomarker.name.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(biomarker.name), biomarker.result))),
-                      color: 'white',
+                      backgroundColor: 'var(--color-surface)',
+                      color: 'var(--color-text-primary)',
                       fontSize: '10px'
                     }}>
                       {biomarker.change === null ? 'N/A' : `${biomarker.change > 0 ? '+' : ''}${biomarker.change.toFixed(1)}%`}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             ))}
           </div>

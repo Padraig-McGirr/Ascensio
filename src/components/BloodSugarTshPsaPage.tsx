@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getBloodRangeColor } from '../utils/bloodRangeColors';
 
 // CSV data for Blood Sugar + TSH + PSA
 const csvData = `BLOOD TYPES,8/28/2023,2/28/2024,8/30/2024,03/11/2025,2/28/2024,38/08/2024,03/11/2025
@@ -80,8 +81,8 @@ const CircularGauge: React.FC<CircularGaugeProps> = ({ biomarker, value, ranges,
       onMouseLeave={() => onHover?.(null)}
     >
       <h4 style={{ 
-        fontSize: '10px', 
-        fontWeight: '600', 
+        fontSize: '12px', 
+        fontWeight: '800', 
         margin: '0 0 8px 0',
         textAlign: 'center',
         color: '#475569'
@@ -90,7 +91,7 @@ const CircularGauge: React.FC<CircularGaugeProps> = ({ biomarker, value, ranges,
       </h4>
       
       <div style={{ position: 'relative', width: size, height: size }}>
-        <svg width={size} height={size} style={{ transform: 'rotate(-135deg)' }}>
+        <svg width={size} height={size} style={{ transform: 'rotate(135deg)' }}>
           {/* Background track (full range) */}
           <circle
             cx={size / 2}
@@ -126,7 +127,7 @@ const CircularGauge: React.FC<CircularGaugeProps> = ({ biomarker, value, ranges,
         }}>
           <div style={{ 
             fontSize: '16px', 
-            fontWeight: '700',
+            fontWeight: '800',
             color: '#1e293b',
             lineHeight: '1'
           }}>
@@ -620,6 +621,16 @@ interface BloodSugarTshPsaTableProps {
 }
 
 const BloodSugarTshPsaTable: React.FC<BloodSugarTshPsaTableProps> = ({ onHover: _onHover, hoveredCell: _hoveredCell }) => {
+  // Helper function to extract biomarker name for color matching
+  const getBiomarkerKey = (fullName: string): string => {
+    // Extract key parts of biomarker name for matching with blood ranges
+    const upperName = fullName.toUpperCase();
+    if (upperName.includes('GLUCOSE')) return 'GLUCOSE';
+    if (upperName.includes('HbA1c')) return 'HbA1c';
+    if (upperName.includes('TSH')) return 'TSH';
+    if (upperName.includes('PSA')) return 'PSA';
+    return fullName;
+  };
   // Data for Blood Sugar + TSH + PSA
   const bloodSugarTshPsaData = [
     { biomarker: 'GLUCOSE MMOL/L', baseline: '#N/A', feb2024: '#N/A', aug2024: '#N/A', mar2025: '#N/A', febChange: '#N/A', augChange: '#N/A', marChange: '#N/A' },
@@ -628,14 +639,6 @@ const BloodSugarTshPsaTable: React.FC<BloodSugarTshPsaTableProps> = ({ onHover: 
     { biomarker: 'PSA', baseline: '#N/A', feb2024: '#N/A', aug2024: '#N/A', mar2025: '#N/A', febChange: '#N/A', augChange: '#N/A', marChange: '#N/A' }
   ];
 
-  const getPercentageColor = (value: string) => {
-    if (value === '#N/A') return 'transparent';
-    const numValue = Math.abs(parseFloat(value.replace('%', '')));
-    if (numValue > 100) return '#dc2626'; // Red
-    if (numValue > 75) return '#7c3aed'; // Purple  
-    if (numValue > 25) return '#059669'; // Green
-    return '#eab308'; // Yellow
-  };
 
   return (
     <div style={{ overflow: 'auto', maxHeight: 'calc(100vh - 120px)' }}>
@@ -769,23 +772,25 @@ const BloodSugarTshPsaTable: React.FC<BloodSugarTshPsaTableProps> = ({ onHover: 
                 {row.biomarker}
               </td>
               <td style={{ 
-                backgroundColor: row.baseline === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                backgroundColor: row.baseline === '#N/A' ? '#6b7280' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.baseline),
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
-                color: row.baseline === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
+                color: row.baseline === '#N/A' ? 'white' : 'white',
+                fontWeight: '600'
               }}>
                 {row.baseline}
               </td>
               <td style={{ 
                 backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'feb' 
-                  ? '#fbbf24' : row.feb2024 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                  ? '#3b82f6' : row.feb2024 === '#N/A' ? '#6b7280' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.feb2024),
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
-                color: row.feb2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
+                color: row.feb2024 === '#N/A' ? 'white' : 'white',
+                fontWeight: '600'
               }}>
                 {row.feb2024}
               </td>
@@ -795,27 +800,20 @@ const BloodSugarTshPsaTable: React.FC<BloodSugarTshPsaTableProps> = ({ onHover: 
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
-                color: 'white',
+                color: 'var(--color-text-primary)',
                 fontWeight: '600'
               }}>
-                <span style={{
-                  backgroundColor: row.febChange === '#N/A' ? '#6b7280' : getPercentageColor(row.febChange),
-                  padding: '2px 6px',
-                  borderRadius: '3px',
-                  display: 'inline-block',
-                  minWidth: '40px'
-                }}>
-                  {row.febChange}
-                </span>
+                {row.febChange}
               </td>
               <td style={{ 
                 backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'aug' 
-                  ? '#fbbf24' : row.aug2024 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                  ? '#3b82f6' : row.aug2024 === '#N/A' ? '#6b7280' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.aug2024),
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
-                color: row.aug2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
+                color: row.aug2024 === '#N/A' ? 'white' : 'white',
+                fontWeight: '600'
               }}>
                 {row.aug2024}
               </td>
@@ -825,27 +823,20 @@ const BloodSugarTshPsaTable: React.FC<BloodSugarTshPsaTableProps> = ({ onHover: 
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
-                color: 'white',
+                color: 'var(--color-text-primary)',
                 fontWeight: '600'
               }}>
-                <span style={{
-                  backgroundColor: row.augChange === '#N/A' ? '#6b7280' : getPercentageColor(row.augChange),
-                  padding: '2px 6px',
-                  borderRadius: '3px',
-                  display: 'inline-block',
-                  minWidth: '40px'
-                }}>
-                  {row.augChange}
-                </span>
+                {row.augChange}
               </td>
               <td style={{ 
                 backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'mar' 
-                  ? '#fbbf24' : row.mar2025 === '#N/A' ? '#f3f4f6' : 'var(--color-surface)',
+                  ? '#3b82f6' : row.mar2025 === '#N/A' ? '#6b7280' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.mar2025),
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
-                color: row.mar2025 === '#N/A' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'
+                color: row.mar2025 === '#N/A' ? 'white' : 'white',
+                fontWeight: '600'
               }}>
                 {row.mar2025}
               </td>
@@ -855,18 +846,10 @@ const BloodSugarTshPsaTable: React.FC<BloodSugarTshPsaTableProps> = ({ onHover: 
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
-                color: 'white',
+                color: 'var(--color-text-primary)',
                 fontWeight: '600'
               }}>
-                <span style={{
-                  backgroundColor: row.marChange === '#N/A' ? '#6b7280' : getPercentageColor(row.marChange),
-                  padding: '2px 6px',
-                  borderRadius: '3px',
-                  display: 'inline-block',
-                  minWidth: '40px'
-                }}>
-                  {row.marChange}
-                </span>
+                {row.marChange}
               </td>
             </tr>
           ))}

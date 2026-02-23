@@ -146,64 +146,77 @@ export const ResultsTable: React.FC = () => {
           backgroundColor: 'var(--color-surface)',
           border: '1px solid var(--color-border-light)',
           borderRadius: '8px',
-          padding: '16px',
-          overflow: 'auto'
+          padding: '8px',
+          overflow: 'visible',
+          height: 'calc(100vh - 24px)',
+          display: 'flex',
+          flexDirection: 'column'
         }}>
           <h2 style={{ 
-            fontSize: 'var(--text-lg)', 
+            fontSize: 'var(--text-md)', 
             fontWeight: '600', 
             color: 'var(--color-text-primary)',
-            marginBottom: '16px',
-            textAlign: 'center'
+            marginBottom: '8px',
+            textAlign: 'center',
+            flexShrink: 0
           }}>
             Blood Test Results
           </h2>
           
-          <div style={{ overflow: 'auto', maxHeight: 'calc(100vh - 120px)' }}>
+          <div style={{ 
+            flex: 1,
+            overflow: 'auto',
+            border: '1px solid var(--color-border)',
+            borderRadius: '4px'
+          }}>
             <table style={{ 
               width: '100%', 
               borderCollapse: 'collapse',
-              fontSize: 'var(--text-xs)'
+              fontSize: '11px',
+              lineHeight: '1.3'
             }}>
               <thead>
                 <tr>
                   <th style={{ 
                     backgroundColor: '#dcfce7', // Light green
-                    padding: '4px',
+                    padding: '4px 3px',
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
-                    fontSize: 'var(--text-xs)',
+                    fontSize: '11px',
                     position: 'sticky',
                     top: 0,
                     left: 0,
-                    zIndex: 20
+                    zIndex: 20,
+                    height: '32px'
                   }}>
                     Biomarker
                   </th>
                   <th style={{ 
                     backgroundColor: 'var(--color-surface)',
-                    padding: '4px',
+                    padding: '4px 3px',
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
-                    fontSize: 'var(--text-xs)',
+                    fontSize: '11px',
                     position: 'sticky',
                     top: 0,
-                    zIndex: 10
+                    zIndex: 10,
+                    height: '32px'
                   }}>
                     8/28/2023
                   </th>
                   <th style={{ 
                     backgroundColor: 'var(--color-surface)',
-                    padding: '4px',
+                    padding: '4px 3px',
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
-                    fontSize: 'var(--text-xs)',
+                    fontSize: '11px',
                     position: 'sticky',
                     top: 0,
-                    zIndex: 10
+                    zIndex: 10,
+                    height: '32px'
                   }}>
                     2/28/2024
                   </th>
@@ -213,23 +226,25 @@ export const ResultsTable: React.FC = () => {
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
-                    fontSize: 'var(--text-xs)',
+                    fontSize: '11px',
                     position: 'sticky',
                     top: 0,
-                    zIndex: 10
+                    zIndex: 10,
+                    height: '32px'
                   }}>
                     % Change
                   </th>
                   <th style={{ 
                     backgroundColor: 'var(--color-surface)',
-                    padding: '4px',
+                    padding: '4px 3px',
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
-                    fontSize: 'var(--text-xs)',
+                    fontSize: '11px',
                     position: 'sticky',
                     top: 0,
-                    zIndex: 10
+                    zIndex: 10,
+                    height: '32px'
                   }}>
                     8/30/2024
                   </th>
@@ -239,23 +254,25 @@ export const ResultsTable: React.FC = () => {
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
-                    fontSize: 'var(--text-xs)',
+                    fontSize: '11px',
                     position: 'sticky',
                     top: 0,
-                    zIndex: 10
+                    zIndex: 10,
+                    height: '32px'
                   }}>
                     % Change
                   </th>
                   <th style={{ 
                     backgroundColor: 'var(--color-surface)',
-                    padding: '4px',
+                    padding: '4px 3px',
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
-                    fontSize: 'var(--text-xs)',
+                    fontSize: '11px',
                     position: 'sticky',
                     top: 0,
-                    zIndex: 10
+                    zIndex: 10,
+                    height: '32px'
                   }}>
                     03/11/2025
                   </th>
@@ -265,10 +282,11 @@ export const ResultsTable: React.FC = () => {
                     border: '1px solid var(--color-border)',
                     textAlign: 'center',
                     fontWeight: '600',
-                    fontSize: 'var(--text-xs)',
+                    fontSize: '11px',
                     position: 'sticky',
                     top: 0,
-                    zIndex: 10
+                    zIndex: 10,
+                    height: '32px'
                   }}>
                     % Change
                   </th>
@@ -279,119 +297,103 @@ export const ResultsTable: React.FC = () => {
                   <tr key={index}>
                     <td style={{ 
                       backgroundColor: '#dcfce7', // Light green
-                      padding: '3px 4px',
+                      padding: '4px 3px',
                       border: '1px solid var(--color-border)',
                       fontWeight: '500',
-                      fontSize: 'var(--text-xs)',
+                      fontSize: '11px',
                       position: 'sticky',
                       left: 0,
-                      zIndex: 10
+                      zIndex: 10,
+                      height: '22px'
                     }}>
                       {row.biomarker}
                     </td>
                     <td style={{ 
                       backgroundColor: row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.baseline),
-                      padding: '3px 4px',
+                      padding: '4px 3px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontSize: 'var(--text-xs)',
+                      fontSize: '11px',
                       color: row.baseline === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
-                      fontWeight: '600'
+                      fontWeight: '600',
+                      height: '22px'
                     }}>
                       {row.baseline}
                     </td>
                     <td style={{ 
                       backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'feb' 
                         ? '#3b82f6' : row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.feb2024),
-                      padding: '3px 4px',
+                      padding: '4px 3px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontSize: 'var(--text-xs)',
+                      fontSize: '11px',
                       color: row.feb2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
-                      fontWeight: '600'
+                      fontWeight: '600',
+                      height: '22px'
                     }}>
                       {row.feb2024}
                     </td>
                     <td style={{ 
                       backgroundColor: '#dbeafe', // Light blue
-                      padding: '3px 4px',
+                      padding: '4px 3px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontSize: 'var(--text-xs)',
-                      color: 'white',
-                      fontWeight: '600'
+                      fontSize: '11px',
+                      color: 'var(--color-text-primary)',
+                      fontWeight: '600',
+                      height: '22px'
                     }}>
-                      <span style={{
-                        backgroundColor: row.feb2024 === '#N/A' ? '#6b7280' : (row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.feb2024)),
-                        padding: '2px 6px',
-                        borderRadius: '3px',
-                        display: 'inline-block',
-                        minWidth: '40px'
-                      }}>
-                        {row.febChange}
-                      </span>
+                      {row.febChange}
                     </td>
                     <td style={{ 
                       backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'aug' 
                         ? '#3b82f6' : row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.aug2024),
-                      padding: '3px 4px',
+                      padding: '4px 3px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontSize: 'var(--text-xs)',
+                      fontSize: '11px',
                       color: row.aug2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
-                      fontWeight: '600'
+                      fontWeight: '600',
+                      height: '22px'
                     }}>
                       {row.aug2024}
                     </td>
                     <td style={{ 
                       backgroundColor: '#dbeafe', // Light blue
-                      padding: '3px 4px',
+                      padding: '4px 3px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontSize: 'var(--text-xs)',
-                      color: 'white',
-                      fontWeight: '600'
+                      fontSize: '11px',
+                      color: 'var(--color-text-primary)',
+                      fontWeight: '600',
+                      height: '22px'
                     }}>
-                      <span style={{
-                        backgroundColor: row.aug2024 === '#N/A' ? '#6b7280' : (row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.aug2024)),
-                        padding: '2px 6px',
-                        borderRadius: '3px',
-                        display: 'inline-block',
-                        minWidth: '40px'
-                      }}>
-                        {row.augChange}
-                      </span>
+                      {row.augChange}
                     </td>
                     <td style={{ 
                       backgroundColor: hoveredCell?.biomarker && row.biomarker.includes(hoveredCell.biomarker) && hoveredCell?.column === 'mar' 
                         ? '#3b82f6' : row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.mar2025),
-                      padding: '3px 4px',
+                      padding: '4px 3px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontSize: 'var(--text-xs)',
+                      fontSize: '11px',
                       color: row.mar2025 === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
-                      fontWeight: '600'
+                      fontWeight: '600',
+                      height: '22px'
                     }}>
                       {row.mar2025}
                     </td>
                     <td style={{ 
                       backgroundColor: '#dbeafe', // Light blue
-                      padding: '3px 4px',
+                      padding: '4px 3px',
                       border: '1px solid var(--color-border)',
                       textAlign: 'center',
-                      fontSize: 'var(--text-xs)',
-                      color: 'white',
-                      fontWeight: '600'
+                      fontSize: '11px',
+                      color: 'var(--color-text-primary)',
+                      fontWeight: '600',
+                      height: '22px'
                     }}>
-                      <span style={{
-                        backgroundColor: row.mar2025 === '#N/A' ? '#6b7280' : (row.biomarker.includes('non HDL') ? '#059669' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.mar2025)),
-                        padding: '2px 6px',
-                        borderRadius: '3px',
-                        display: 'inline-block',
-                        minWidth: '40px'
-                      }}>
-                        {row.marChange}
-                      </span>
+                      {row.marChange}
                     </td>
                   </tr>
                 ))}

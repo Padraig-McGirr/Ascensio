@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getBloodRangeColor } from '../utils/bloodRangeColors';
 
 // CSV data for Red Blood Cells
 const csvData = `BLOOD TYPES,8/28/2023,2/28/2024,8/30/2024,03/11/2025,2/28/2024,38/08/2024,03/11/2025
@@ -84,8 +85,8 @@ const CircularGauge: React.FC<CircularGaugeProps> = ({ biomarker, value, ranges,
       onMouseLeave={() => onHover?.(null)}
     >
       <h4 style={{ 
-        fontSize: '10px', 
-        fontWeight: '600', 
+        fontSize: '12px', 
+        fontWeight: '800', 
         margin: '0 0 8px 0',
         textAlign: 'center',
         color: '#475569'
@@ -94,7 +95,7 @@ const CircularGauge: React.FC<CircularGaugeProps> = ({ biomarker, value, ranges,
       </h4>
       
       <div style={{ position: 'relative', width: size, height: size }}>
-        <svg width={size} height={size} style={{ transform: 'rotate(-135deg)' }}>
+        <svg width={size} height={size} style={{ transform: 'rotate(135deg)' }}>
           {/* Background track (full range) */}
           <circle
             cx={size / 2}
@@ -130,7 +131,7 @@ const CircularGauge: React.FC<CircularGaugeProps> = ({ biomarker, value, ranges,
         }}>
           <div style={{ 
             fontSize: '16px', 
-            fontWeight: '700',
+            fontWeight: '800',
             color: '#1e293b',
             lineHeight: '1'
           }}>
@@ -710,6 +711,19 @@ interface RedBloodCellsTableProps {
 }
 
 const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover: _onHover, hoveredCell: _hoveredCell }) => {
+  // Helper function to extract biomarker name for color matching
+  const getBiomarkerKey = (fullName: string): string => {
+    // Extract key parts of biomarker name for matching with blood ranges
+    const upperName = fullName.toUpperCase();
+    if (upperName.includes('RBC')) return 'RBC';
+    if (upperName.includes('HAEMOGLOBIN')) return 'HAEMOGLOBIN';
+    if (upperName.includes('HAEMATOCRIT')) return 'HAEMATOCRIT';
+    if (upperName.includes('MCV')) return 'MCV';
+    if (upperName.includes('MCH')) return 'MCH';
+    if (upperName.includes('MCHC')) return 'MCHC';
+    return fullName;
+  };
+
   // Filter data for red blood cells only
   const redBloodCellsData = [
     { biomarker: 'RBC (X10*12)', baseline: '4.31', feb2024: '4.04', aug2024: '4.39', mar2025: '4.49', febChange: '-6%', augChange: '9%', marChange: '2%' },
@@ -861,21 +875,25 @@ const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover: _onHov
                 {row.biomarker}
               </td>
               <td style={{ 
-                backgroundColor: 'var(--color-surface)',
+                backgroundColor: getBloodRangeColor(getBiomarkerKey(row.biomarker), row.baseline),
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
-                fontSize: 'var(--text-xs)'
+                fontSize: 'var(--text-xs)',
+                color: row.baseline === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
+                fontWeight: '600'
               }}>
                 {row.baseline}
               </td>
               <td style={{ 
                 backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'feb' 
-                  ? '#fbbf24' : 'var(--color-surface)',
+                  ? '#3b82f6' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.feb2024),
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
-                fontSize: 'var(--text-xs)'
+                fontSize: 'var(--text-xs)',
+                color: row.feb2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
+                fontWeight: '600'
               }}>
                 {row.feb2024}
               </td>
@@ -885,26 +903,20 @@ const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover: _onHov
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
-                color: 'white',
+                color: 'var(--color-text-primary)',
                 fontWeight: '600'
               }}>
-                <span style={{
-                  backgroundColor: getPercentageColor(row.febChange),
-                  padding: '2px 6px',
-                  borderRadius: '3px',
-                  display: 'inline-block',
-                  minWidth: '40px'
-                }}>
-                  {row.febChange}
-                </span>
+                {row.febChange}
               </td>
               <td style={{ 
                 backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'aug' 
-                  ? '#fbbf24' : 'var(--color-surface)',
+                  ? '#3b82f6' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.aug2024),
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
-                fontSize: 'var(--text-xs)'
+                fontSize: 'var(--text-xs)',
+                color: row.aug2024 === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
+                fontWeight: '600'
               }}>
                 {row.aug2024}
               </td>
@@ -914,26 +926,20 @@ const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover: _onHov
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
-                color: 'white',
+                color: 'var(--color-text-primary)',
                 fontWeight: '600'
               }}>
-                <span style={{
-                  backgroundColor: getPercentageColor(row.augChange),
-                  padding: '2px 6px',
-                  borderRadius: '3px',
-                  display: 'inline-block',
-                  minWidth: '40px'
-                }}>
-                  {row.augChange}
-                </span>
+                {row.augChange}
               </td>
               <td style={{ 
                 backgroundColor: _hoveredCell?.biomarker && row.biomarker.includes(_hoveredCell.biomarker) && _hoveredCell?.column === 'mar' 
-                  ? '#fbbf24' : 'var(--color-surface)',
+                  ? '#3b82f6' : getBloodRangeColor(getBiomarkerKey(row.biomarker), row.mar2025),
                 padding: '3px 4px',
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
-                fontSize: 'var(--text-xs)'
+                fontSize: 'var(--text-xs)',
+                color: row.mar2025 === '#N/A' ? 'var(--color-text-tertiary)' : 'white',
+                fontWeight: '600'
               }}>
                 {row.mar2025}
               </td>
@@ -943,18 +949,10 @@ const RedBloodCellsTable: React.FC<RedBloodCellsTableProps> = ({ onHover: _onHov
                 border: '1px solid var(--color-border)',
                 textAlign: 'center',
                 fontSize: 'var(--text-xs)',
-                color: 'white',
+                color: 'var(--color-text-primary)',
                 fontWeight: '600'
               }}>
-                <span style={{
-                  backgroundColor: getPercentageColor(row.marChange),
-                  padding: '2px 6px',
-                  borderRadius: '3px',
-                  display: 'inline-block',
-                  minWidth: '40px'
-                }}>
-                  {row.marChange}
-                </span>
+                {row.marChange}
               </td>
             </tr>
           ))}

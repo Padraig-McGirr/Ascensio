@@ -22,7 +22,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => {
   });
 
   // State for tracking which biomarker should be highlighted in the table
-  const [highlightedBiomarker, setHighlightedBiomarker] = React.useState<string | null>(null);
+  const [highlightedBiomarker] = React.useState<string | null>(null);
 
   // Chart filter state
   const [selectedTimeRange] = React.useState<string>('last2'); // For top chart
@@ -276,7 +276,6 @@ biomarkers: [
               onChartHover={setChartHover}
               timeframe={selectedTimeRange}
               selectedBiomarkerGroups={selectedBiomarkerGroups}
-              onBiomarkerHover={setHighlightedBiomarker}
             />
           </div>
 
@@ -345,7 +344,6 @@ biomarkers: [
               onChartHover={setChartHover}
               timeframe={bottomChartTimeRange}
               selectedBiomarkerGroups={selectedBiomarkerGroups}
-              onBiomarkerHover={setHighlightedBiomarker}
             />
           </div>
         </div>
